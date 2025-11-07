@@ -30,17 +30,18 @@ export default async function handler(req, res) {
       const base64Data = image.split(',')[1];
       const mimeType = image.split(';')[0].split(':')[1];
 
-      enhancedPrompt = 'Create a detailed, photorealistic monument inspired by this image. The monument should be architectural, grand, and impressive. Transform the elements from this image into a majestic monument structure.';
+      // UPDATED PROMPT - More explicit about creating monument FROM the image
+      enhancedPrompt = 'Look at this image carefully. Create a grand, impressive monument sculpture or statue that depicts exactly what you see in this image. The monument should be a 3D architectural structure made of stone, metal, or marble that represents the subject, person, object, or scene from this image. Transform what you see into a photorealistic monument that could exist in a public plaza or park. The monument should clearly show the same subject matter as the uploaded image, but as a majestic statue or architectural monument.';
 
       contentParts = [
-        {
-          text: enhancedPrompt
-        },
         {
           inline_data: {
             mime_type: mimeType,
             data: base64Data
           }
+        },
+        {
+          text: enhancedPrompt
         }
       ];
     } else {
