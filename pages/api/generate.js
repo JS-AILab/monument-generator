@@ -1,16 +1,58 @@
 export default async function handler(req, res) {
+  if (!process.env.GEMINI_API_KEY) {
+    return res.status(500).json({ error: 'API key not configured on server' });
+  }
+
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  const { prompt } = req.body;
+  const { mode, prompt, image } = req.body;
 
-  if (!prompt) {
-    return res.status(400).json({ error: 'Prompt is required' });
+  if (!mode || (mode !== 'text' && mode !== 'image')) {
+    return res.status(400).json({ error: 'Invalid mode' });
+  }
+
+  if (mode === 'text' && !prompt) {
+    return res.status(400).json({ error: 'Prompt is required for text mode' });
+  }
+
+  if (mode === 'image' && !image) {
+    return res.status(400).json({ error: 'Image is required for image mode' });
   }
 
   try {
-    const enhancedPrompt = `Create a detailed, photorealistic image of a monument: ${prompt}. The image should be architectural, grand, and impressive.`;
+    let enhancedPrompt;
+    let contentParts = [];
+
+    if (mode === 'image') {
+      // Extract base64 data from uploaded image
+      const base64Data = image.split(',')[1];
+      const mimeType = image.split(';')[0].split(':')[1];
+
+      enhancedPrompt = 'Create a detailed, photorealistic monument inspired by this image. The monument should be architectural, grand, and impressive. Transform the elements from this image into a majestic monument structure.';
+
+      contentParts = [
+        {
+          text: enhancedPrompt
+        },
+        {
+          inline_data: {
+            mime_type: mimeType,
+            data: base64Data
+          }
+        }
+      ];
+    } else {
+      // Text mode
+      enhancedPrompt = `Create a detailed, photorealistic image of a monument: ${prompt}. The image should be architectural, grand, and impressive.`;
+      
+      contentParts = [
+        {
+          text: enhancedPrompt
+        }
+      ];
+    }
 
     const response = await fetch(
       `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent?key=${process.env.GEMINI_API_KEY}`,
@@ -21,9 +63,7 @@ export default async function handler(req, res) {
         },
         body: JSON.stringify({
           contents: [{
-            parts: [{
-              text: enhancedPrompt
-            }]
+            parts: contentParts
           }],
           generationConfig: {
             temperature: 1,
@@ -40,12 +80,14 @@ export default async function handler(req, res) {
     const data = await response.json();
 
     if (!response.ok) {
-      throw new Error(data.error?.message || 'Failed to generate image');
+      return res.status(500).json({ 
+        error: data.error?.message || 'Failed to generate image',
+        details: data 
+      });
     }
 
-    // Look through all parts for an image
     let foundImage = false;
-    if (data.candidates?.[0]?.content?.parts) {
+    if (data.candidates && data.candidates[0] && data.candidates[0].content && data.candidates[0].content.parts) {
       for (const part of data.candidates[0].content.parts) {
         if (part.inlineData || part.inline_data) {
           const imageData = part.inlineData?.data || part.inline_data?.data;
@@ -57,9 +99,7 @@ export default async function handler(req, res) {
       }
     }
     
-    if (!foundImage) {
-      throw new Error('No image data received from the API');
-    }
+    throw new Error('No image data received from the API');
   } catch (error) {
     console.error('Error:', error);
     return res.status(500).json({ error: error.message });
