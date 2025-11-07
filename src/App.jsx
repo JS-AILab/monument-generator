@@ -4,7 +4,7 @@ import { Camera, Loader2, Download } from 'lucide-react';
 export default function MonumentGenerator() {
   const [prompt, setPrompt] = useState('');
   const [imageUrl, setImageUrl] = useState('');
-  const [loading, setLoading] = useState('');
+  const [loading, setLoading] = useState(false);  // ← Changed from '' to false
   const [error, setError] = useState('');
 
   const generateImage = async () => {
@@ -18,7 +18,6 @@ export default function MonumentGenerator() {
     setImageUrl('');
 
     try {
-      // Call your secure API endpoint instead of Gemini directly
       const response = await fetch('/api/generate', {
         method: 'POST',
         headers: {
