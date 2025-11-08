@@ -21,6 +21,9 @@ export default function MonumentGenerator() {
   const [describingScene, setDescribingScene] = useState(false);
   const [finalImage, setFinalImage] = useState('');
   const [compositing, setCompositing] = useState(false);
+  // Add this state variable with the other state declarations at the top
+const [compositePrompt, setCompositePrompt] = useState('');
+const [generatingPrompt, setGeneratingPrompt] = useState(false);
 
   // Helper function to compress images
   const compressImage = (base64Image, maxWidth = 800) => {
@@ -116,41 +119,82 @@ export default function MonumentGenerator() {
   };
 
   const describeScene = async (imageData) => {
-    setDescribingScene(true);
-    setSceneDescription('');
-    
-    try {
-      const response = await fetch('/api/describe-scene', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          image: imageData
-        })
-      });
+  setDescribingScene(true);
+  setSceneDescription('');
+  setCompositePrompt('');
+  
+  try {
+    // Step 1: Describe the scene
+    const response = await fetch('/api/describe-scene', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        image: imageData
+      })
+    });
 
-      const data = await response.json();
+    const data = await response.json();
 
-      if (!response.ok) {
-        console.error('Describe scene error:', data);
-        throw new Error(data.error || 'Failed to describe scene');
-      }
-
-      if (data.description) {
-        setSceneDescription(data.description);
-      } else {
-        throw new Error('No description received');
-      }
-    } catch (err) {
-      console.error('Error describing scene:', err);
-      setError(`Could not auto-describe scene: ${err.message}. Please describe it manually.`);
-      // Set a default description so user can edit
-      setSceneDescription('Describe your scene here...');
-    } finally {
-      setDescribingScene(false);
+    if (!response.ok) {
+      console.error('Describe scene error:', data);
+      throw new Error(data.error || 'Failed to describe scene');
     }
-  };
+
+    if (data.description) {
+      setSceneDescription(data.description);
+      
+      // Step 2: Generate composite prompt automatically
+      await generateCompositePrompt(data.description);
+    } else {
+      throw new Error('No description received');
+    }
+  } catch (err) {
+    console.error('Error describing scene:', err);
+    setError(`Could not auto-describe scene: ${err.message}. Please describe it manually.`);
+    setSceneDescription('Describe your scene here...');
+  } finally {
+    setDescribingScene(false);
+  }
+};
+
+const generateCompositePrompt = async (sceneDesc) => {
+  setGeneratingPrompt(true);
+  
+  try {
+    const response = await fetch('/api/generate-composite-prompt', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        monumentDescription: monumentDescription,
+        sceneDescription: sceneDesc
+      })
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      console.error('Generate prompt error:', data);
+      throw new Error(data.error || 'Failed to generate composite prompt');
+    }
+
+    if (data.compositePrompt) {
+      setCompositePrompt(data.compositePrompt);
+    } else {
+      throw new Error('No composite prompt received');
+    }
+  } catch (err) {
+    console.error('Error generating composite prompt:', err);
+    setError(`Could not generate composite description. Please edit manually.`);
+    // Provide a basic fallback
+    setCompositePrompt(`${sceneDesc} In this scene, there is ${monumentDescription}`);
+  } finally {
+    setGeneratingPrompt(false);
+  }
+};
 
   const removeUploadedImage = () => {
     setUploadedImage(null);
@@ -158,10 +202,11 @@ export default function MonumentGenerator() {
   };
 
   const removeSceneImage = () => {
-    setSceneImage(null);
-    setSceneImagePreview('');
-    setSceneDescription('');
-  };
+  setSceneImage(null);
+  setSceneImagePreview('');
+  setSceneDescription('');
+  setCompositePrompt('');  // Added
+};
 
   const switchMode = (newMode) => {
     if (newMode === 'text') {
@@ -177,13 +222,14 @@ export default function MonumentGenerator() {
   };
 
   const switchSceneMode = (newMode) => {
-    setSceneMode(newMode);
-    setScenePrompt('');
-    setSceneImage(null);
-    setSceneImagePreview('');
-    setSceneDescription('');
-    setError('');
-  };
+  setSceneMode(newMode);
+  setScenePrompt('');
+  setSceneImage(null);
+  setSceneImagePreview('');
+  setSceneDescription('');
+  setCompositePrompt('');  // Added
+  setError('');
+};
 
 const generateMonument = async () => {
   if (mode === 'text' && !prompt.trim()) {
@@ -241,19 +287,14 @@ const generateMonument = async () => {
     setLoading(false);
   }
 };
-  const compositeImages = async () => {
+ const compositeImages = async () => {
   if (sceneMode === 'text' && !scenePrompt.trim()) {
     setError('Please describe the scene');
     return;
   }
 
-  if (sceneMode === 'image' && !sceneImage) {
-    setError('Please upload a scene image');
-    return;
-  }
-
-  if (sceneMode === 'image' && !sceneDescription.trim()) {
-    setError('Please provide a scene description');
+  if (sceneMode === 'image' && !compositePrompt.trim()) {
+    setError('Please provide a composite description');
     return;
   }
 
@@ -262,17 +303,22 @@ const generateMonument = async () => {
   setFinalImage('');
 
   try {
+    // For text mode, create a simple composite prompt
+    let finalCompositePrompt = '';
+    
+    if (sceneMode === 'text') {
+      finalCompositePrompt = `${scenePrompt}. In this scene, prominently placed is ${monumentDescription}`;
+    } else {
+      finalCompositePrompt = compositePrompt;
+    }
+
     const response = await fetch('/api/composite', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        monumentImage: monumentUrl,  // ADDED: Send the actual monument image
-        monumentDescription: monumentDescription,
-        sceneMode: sceneMode,
-        sceneDescription: sceneMode === 'text' ? scenePrompt : sceneDescription,
-        sceneImage: sceneMode === 'image' ? sceneImage : null
+        compositePrompt: finalCompositePrompt
       })
     });
 
@@ -295,7 +341,6 @@ const generateMonument = async () => {
     setCompositing(false);
   }
 };
-
   const shareImage = async () => {
   if (!finalImage) return;
 
@@ -353,21 +398,22 @@ const generateMonument = async () => {
 };
 
   const resetAndStartOver = () => {
-    setStep(1);
-    setMode('text');
-    setPrompt('');
-    setMonumentUrl('');
-    setMonumentDescription('');
-    setUploadedImage(null);
-    setUploadedImagePreview('');
-    setSceneMode('text');
-    setScenePrompt('');
-    setSceneImage(null);
-    setSceneImagePreview('');
-    setSceneDescription('');
-    setFinalImage('');
-    setError('');
-  };
+  setStep(1);
+  setMode('text');
+  setPrompt('');
+  setMonumentUrl('');
+  setMonumentDescription('');
+  setUploadedImage(null);
+  setUploadedImagePreview('');
+  setSceneMode('text');
+  setScenePrompt('');
+  setSceneImage(null);
+  setSceneImagePreview('');
+  setSceneDescription('');
+  setCompositePrompt('');  // Added
+  setFinalImage('');
+  setError('');
+};
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 p-8">
@@ -598,70 +644,89 @@ const generateMonument = async () => {
             )}
 
             {/* Scene Image Mode */}
-            {sceneMode === 'image' && (
-              <div className="bg-white/10 backdrop-blur-md rounded-lg p-6 mb-6 border border-purple-400/30">
-                <label className="block text-white font-semibold mb-2">
-                  Upload Scene Image
-                </label>
-                <p className="text-purple-200 text-sm mb-3">
-                  Upload a background scene where you want to place your monument
-                </p>
-                
-                {!sceneImagePreview ? (
-                  <div className="border-2 border-dashed border-purple-400/50 rounded-lg p-8 text-center hover:border-purple-400 transition-colors cursor-pointer">
-                    <input
-                      type="file"
-                      accept="image/*"
-                      onChange={handleSceneUpload}
-                      className="hidden"
-                      id="scene-upload"
-                    />
-                    <label htmlFor="scene-upload" className="cursor-pointer">
-                      <Upload className="w-12 h-12 text-purple-300 mx-auto mb-3" />
-                      <p className="text-purple-200 mb-1">Click to upload a scene</p>
-                      <p className="text-purple-300 text-sm">PNG, JPG, GIF up to 4MB</p>
-                    </label>
-                  </div>
-                ) : (
-                  <>
-                    <div className="relative mb-4">
-                      <img
-                        src={sceneImagePreview}
-                        alt="Scene background"
-                        className="w-full h-64 object-contain rounded-lg bg-black/20"
-                      />
-                      <button
-                        onClick={removeSceneImage}
-                        className="absolute top-2 right-2 bg-red-500 hover:bg-red-600 text-white rounded-full p-2 transition-colors"
-                      >
-                        <X className="w-4 h-4" />
-                      </button>
-                    </div>
+            {/* Scene Image Mode */}
+{sceneMode === 'image' && (
+  <div className="bg-white/10 backdrop-blur-md rounded-lg p-6 mb-6 border border-purple-400/30">
+    <label className="block text-white font-semibold mb-2">
+      Upload Scene Image
+    </label>
+    <p className="text-purple-200 text-sm mb-3">
+      Upload a background scene where you want to place your monument
+    </p>
+    
+    {!sceneImagePreview ? (
+      <div className="border-2 border-dashed border-purple-400/50 rounded-lg p-8 text-center hover:border-purple-400 transition-colors cursor-pointer">
+        <input
+          type="file"
+          accept="image/*"
+          onChange={handleSceneUpload}
+          className="hidden"
+          id="scene-upload"
+        />
+        <label htmlFor="scene-upload" className="cursor-pointer">
+          <Upload className="w-12 h-12 text-purple-300 mx-auto mb-3" />
+          <p className="text-purple-200 mb-1">Click to upload a scene</p>
+          <p className="text-purple-300 text-sm">PNG, JPG, GIF up to 4MB</p>
+        </label>
+      </div>
+    ) : (
+      <>
+        <div className="relative mb-4">
+          <img
+            src={sceneImagePreview}
+            alt="Scene background"
+            className="w-full h-64 object-contain rounded-lg bg-black/20"
+          />
+          <button
+            onClick={removeSceneImage}
+            className="absolute top-2 right-2 bg-red-500 hover:bg-red-600 text-white rounded-full p-2 transition-colors"
+          >
+            <X className="w-4 h-4" />
+          </button>
+        </div>
 
-                    {/* Scene Description */}
-                    <div>
-                      <label className="block text-white font-semibold mb-2 flex items-center gap-2">
-                        <Edit className="w-4 h-4" />
-                        Scene Description (editable)
-                      </label>
-                      {describingScene ? (
-                        <div className="flex items-center gap-2 text-purple-200 py-3">
-                          <Loader2 className="w-4 h-4 animate-spin" />
-                          <span>Analyzing scene...</span>
-                        </div>
-                      ) : (
-                        <textarea
-                          value={sceneDescription}
-                          onChange={(e) => setSceneDescription(e.target.value)}
-                          placeholder="AI will describe the scene automatically, but you can edit it..."
-                          className="w-full px-4 py-3 rounded-lg bg-white/20 text-white placeholder-purple-300 border border-purple-400/30 focus:outline-none focus:ring-2 focus:ring-purple-400 min-h-24 resize-y"
-                        />
-                      )}
-                    </div>
-                  </>
-                )}
-              </div>
-            )}
+        {/* Scene Description (for reference) */}
+        {sceneDescription && (
+          <div className="mb-4">
+            <label className="block text-white font-semibold mb-2">
+              Scene Analysis:
+            </label>
+            <div className="px-4 py-3 rounded-lg bg-white/10 text-purple-200 text-sm border border-purple-400/20">
+              {sceneDescription}
+            </div>
+          </div>
+        )}
+
+        {/* Composite Description (main editable field) */}
+        <div>
+          <label className="block text-white font-semibold mb-2 flex items-center gap-2">
+            <Edit className="w-4 h-4" />
+            Complete Scene Description (editable)
+          </label>
+          <p className="text-purple-200 text-sm mb-2">
+            This describes the final scene with your monument in it
+          </p>
+          {describingScene || generatingPrompt ? (
+            <div className="flex items-center gap-2 text-purple-200 py-3">
+              <Loader2 className="w-4 h-4 animate-spin" />
+              <span>
+                {describingScene ? 'Analyzing scene...' : 'Creating composite description...'}
+              </span>
+            </div>
+          ) : (
+            <textarea
+              value={compositePrompt}
+              onChange={(e) => setCompositePrompt(e.target.value)}
+              placeholder="AI will generate a complete description combining your monument and scene..."
+              className="w-full px-4 py-3 rounded-lg bg-white/20 text-white placeholder-purple-300 border border-purple-400/30 focus:outline-none focus:ring-2 focus:ring-purple-400 min-h-32 resize-y"
+            />
+          )}
+        </div>
+      </>
+    )}
+  </div>
+)}
+                    
 
             {/* Action Buttons */}
             <div className="flex gap-4 mb-6">
@@ -672,14 +737,14 @@ const generateMonument = async () => {
                 ← Back
               </button>
               <button
-                onClick={compositeImages}
-                disabled={
-                  compositing || 
-                  (sceneMode === 'text' && !scenePrompt.trim()) || 
-                  (sceneMode === 'image' && (!sceneImage || !sceneDescription.trim()))
-                }
-                className="flex-1 py-4 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-lg font-semibold text-lg hover:from-purple-700 hover:to-pink-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all transform hover:scale-105 active:scale-95 flex items-center justify-center gap-2"
-              >
+  onClick={compositeImages}
+  disabled={
+    compositing || 
+    (sceneMode === 'text' && !scenePrompt.trim()) || 
+    (sceneMode === 'image' && (!sceneImage || !compositePrompt.trim()))
+  }
+  className="flex-1 py-4 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-lg font-semibold text-lg hover:from-purple-700 hover:to-pink-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all transform hover:scale-105 active:scale-95 flex items-center justify-center gap-2"
+>
                 {compositing ? (
                   <>
                     <Loader2 className="w-5 h-5 animate-spin" />
