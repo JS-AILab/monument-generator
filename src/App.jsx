@@ -90,15 +90,20 @@ export default function MonumentGenerator() {
       const data = await response.json();
 
       if (!response.ok) {
+        console.error('Describe scene error:', data);
         throw new Error(data.error || 'Failed to describe scene');
       }
 
       if (data.description) {
         setSceneDescription(data.description);
+      } else {
+        throw new Error('No description received');
       }
     } catch (err) {
-      setError('Could not auto-describe scene. Please describe it manually.');
-      console.error('Error:', err);
+      console.error('Error describing scene:', err);
+      setError(`Could not auto-describe scene: ${err.message}. Please describe it manually.`);
+      // Set a default description so user can edit
+      setSceneDescription('Describe your scene here...');
     } finally {
       setDescribingScene(false);
     }
