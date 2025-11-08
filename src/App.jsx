@@ -235,58 +235,59 @@ export default function MonumentGenerator() {
   };
 
   const compositeImages = async () => {
-    if (sceneMode === 'text' && !scenePrompt.trim()) {
-      setError('Please describe the scene');
-      return;
-    }
+  if (sceneMode === 'text' && !scenePrompt.trim()) {
+    setError('Please describe the scene');
+    return;
+  }
 
-    if (sceneMode === 'image' && !sceneImage) {
-      setError('Please upload a scene image');
-      return;
-    }
+  if (sceneMode === 'image' && !sceneImage) {
+    setError('Please upload a scene image');
+    return;
+  }
 
-    if (sceneMode === 'image' && !sceneDescription.trim()) {
-      setError('Please provide a scene description');
-      return;
-    }
+  if (sceneMode === 'image' && !sceneDescription.trim()) {
+    setError('Please provide a scene description');
+    return;
+  }
 
-    setCompositing(true);
-    setError('');
-    setFinalImage('');
+  setCompositing(true);
+  setError('');
+  setFinalImage('');
 
-    try {
-      const response = await fetch('/api/composite', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          monumentDescription: monumentDescription,
-          sceneMode: sceneMode,
-          sceneDescription: sceneMode === 'text' ? scenePrompt : sceneDescription,
-          sceneImage: sceneMode === 'image' ? sceneImage : null
-        })
-      });
+  try {
+    const response = await fetch('/api/composite', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        monumentImage: monumentUrl,  // ADDED: Send the actual monument image
+        monumentDescription: monumentDescription,
+        sceneMode: sceneMode,
+        sceneDescription: sceneMode === 'text' ? scenePrompt : sceneDescription,
+        sceneImage: sceneMode === 'image' ? sceneImage : null
+      })
+    });
 
-      if (!response.ok) {
-        const data = await response.json();
-        throw new Error(data.error || 'Failed to composite images');
-      }
-
+    if (!response.ok) {
       const data = await response.json();
-
-      if (data.imageUrl) {
-        setFinalImage(data.imageUrl);
-      } else {
-        throw new Error('No final image received');
-      }
-    } catch (err) {
-      setError(err.message || 'Failed to create final image. Please try again.');
-      console.error('Error:', err);
-    } finally {
-      setCompositing(false);
+      throw new Error(data.error || 'Failed to composite images');
     }
-  };
+
+    const data = await response.json();
+
+    if (data.imageUrl) {
+      setFinalImage(data.imageUrl);
+    } else {
+      throw new Error('No final image received');
+    }
+  } catch (err) {
+    setError(err.message || 'Failed to create final image. Please try again.');
+    console.error('Error:', err);
+  } finally {
+    setCompositing(false);
+  }
+};
 
   const shareImage = async () => {
   if (!finalImage) return;
