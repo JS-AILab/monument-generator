@@ -2,8 +2,8 @@ import React, { useState } from 'react';
 import { Camera, Loader2, Download, Upload, X, Type, Image, Share2 } from 'lucide-react';
 
 export default function MonumentGenerator() {
-  const [step, setStep] = useState(1); // 1 or 2
-  const [mode, setMode] = useState('text'); // 'text' or 'image'
+  const [step, setStep] = useState(1);
+  const [mode, setMode] = useState('text');
   const [prompt, setPrompt] = useState('');
   const [monumentUrl, setMonumentUrl] = useState('');
   const [loading, setLoading] = useState(false);
@@ -11,7 +11,6 @@ export default function MonumentGenerator() {
   const [uploadedImage, setUploadedImage] = useState(null);
   const [uploadedImagePreview, setUploadedImagePreview] = useState('');
   
-  // Step 2 states
   const [sceneImage, setSceneImage] = useState(null);
   const [sceneImagePreview, setSceneImagePreview] = useState('');
   const [finalImage, setFinalImage] = useState('');
@@ -74,10 +73,13 @@ export default function MonumentGenerator() {
   };
 
   const switchMode = (newMode) => {
+    if (newMode === 'text') {
+      setUploadedImage(null);
+      setUploadedImagePreview('');
+    } else {
+      setPrompt('');
+    }
     setMode(newMode);
-    setPrompt('');
-    setUploadedImage(null);
-    setUploadedImagePreview('');
     setError('');
     setMonumentUrl('');
   };
@@ -151,11 +153,12 @@ export default function MonumentGenerator() {
         })
       });
 
-      const data = await response.json();
-
       if (!response.ok) {
+        const data = await response.json();
         throw new Error(data.error || 'Failed to composite images');
       }
+
+      const data = await response.json();
 
       if (data.imageUrl) {
         setFinalImage(data.imageUrl);
@@ -185,7 +188,6 @@ export default function MonumentGenerator() {
     if (!finalImage) return;
 
     try {
-      // Convert base64 to blob
       const response = await fetch(finalImage);
       const blob = await response.blob();
       const file = new File([blob], 'monument.jpg', { type: 'image/jpeg' });
@@ -197,7 +199,6 @@ export default function MonumentGenerator() {
           text: 'Check out this monument I created!'
         });
       } else {
-        // Fallback: copy link or download
         setError('Sharing not supported on this device. Please use the download button.');
       }
     } catch (err) {
@@ -230,7 +231,6 @@ export default function MonumentGenerator() {
           <p className="text-purple-200">Create stunning monument images using AI - powered by Google Gemini</p>
         </div>
 
-        {/* Step Indicator */}
         <div className="flex items-center justify-center gap-4 mb-8">
           <div className={`flex items-center gap-2 ${step === 1 ? 'text-white' : 'text-purple-300'}`}>
             <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold ${step === 1 ? 'bg-purple-600' : 'bg-purple-800'}`}>
@@ -247,10 +247,8 @@ export default function MonumentGenerator() {
           </div>
         </div>
 
-        {/* STEP 1: Create Monument */}
         {step === 1 && (
           <>
-            {/* Mode Selector */}
             <div className="bg-white/10 backdrop-blur-md rounded-lg p-2 mb-6 border border-purple-400/30 flex gap-2">
               <button
                 onClick={() => switchMode('text')}
@@ -276,7 +274,6 @@ export default function MonumentGenerator() {
               </button>
             </div>
 
-            {/* Text Mode */}
             {mode === 'text' && (
               <div className="bg-white/10 backdrop-blur-md rounded-lg p-6 mb-6 border border-purple-400/30">
                 <label className="block text-white font-semibold mb-2">
@@ -291,7 +288,6 @@ export default function MonumentGenerator() {
               </div>
             )}
 
-            {/* Image Mode */}
             {mode === 'image' && (
               <div className="bg-white/10 backdrop-blur-md rounded-lg p-6 mb-6 border border-purple-400/30">
                 <label className="block text-white font-semibold mb-2">
@@ -331,7 +327,6 @@ export default function MonumentGenerator() {
               </div>
             )}
 
-            {/* Generate Monument Button */}
             <button
               onClick={generateMonument}
               disabled={loading || (mode === 'text' && !prompt.trim()) || (mode === 'image' && !uploadedImage)}
@@ -390,7 +385,6 @@ export default function MonumentGenerator() {
           </>
         )}
 
-        {/* STEP 2: Add Monument to Scene */}
         {step === 2 && (
           <>
             <div className="bg-white/10 backdrop-blur-md rounded-lg p-6 mb-6 border border-purple-400/30">
