@@ -22,7 +22,32 @@ export default function MonumentGenerator() {
   const [finalImage, setFinalImage] = useState('');
   const [compositing, setCompositing] = useState(false);
 
-  const handleImageUpload = (e) => {
+  // Helper function to compress images
+  const compressImage = (base64Image, maxWidth = 800) => {
+    return new Promise((resolve) => {
+      const img = new window.Image();
+      img.src = base64Image;
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        let width = img.width;
+        let height = img.height;
+
+        if (width > maxWidth) {
+          height = (height * maxWidth) / width;
+          width = maxWidth;
+        }
+
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, width, height);
+        
+        resolve(canvas.toDataURL('image/jpeg', 0.7));
+      };
+    });
+  };
+
+  const handleImageUpload = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
 
@@ -37,10 +62,20 @@ export default function MonumentGenerator() {
     }
 
     const reader = new FileReader();
-    reader.onloadend = () => {
-      setUploadedImage(reader.result);
-      setUploadedImagePreview(reader.result);
-      setError('');
+    reader.onloadend = async () => {
+      const imageData = reader.result;
+      setUploadedImagePreview(imageData);
+      
+      try {
+        // Compress image before storing
+        const compressedImage = await compressImage(imageData, 1024);
+        setUploadedImage(compressedImage);
+        setError('');
+      } catch (err) {
+        console.error('Error compressing image:', err);
+        setUploadedImage(imageData); // Fallback to original
+        setError('');
+      }
     };
     reader.readAsDataURL(file);
   };
@@ -62,12 +97,20 @@ export default function MonumentGenerator() {
     const reader = new FileReader();
     reader.onloadend = async () => {
       const imageData = reader.result;
-      setSceneImage(imageData);
-      setSceneImagePreview(imageData);
+      setSceneImagePreview(imageData); // Original for display
       setError('');
       
-      // Auto-describe the scene
-      await describeScene(imageData);
+      try {
+        // Compress image before sending to API
+        const compressedImage = await compressImage(imageData, 800);
+        setSceneImage(compressedImage);
+        
+        // Try to auto-describe with compressed image
+        await describeScene(compressedImage);
+      } catch (err) {
+        console.error('Error processing image:', err);
+        setError('Error processing image. Please try again.');
+      }
     };
     reader.readAsDataURL(file);
   };
