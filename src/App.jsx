@@ -331,14 +331,25 @@ const generateMonument = async () => {
   setFinalImage('');
 
   try {
+    // Prepare payload with images AND text prompt
+    const payload = {
+      compositePrompt: finalCompositePrompt,
+      monumentImage: monumentUrl,  // Always send monument image
+      sceneImage: sceneMode === 'image' ? sceneImage : null  // Send scene image only in image mode
+    };
+
+    console.log('Sending to composite API:', {
+      hasMonumentImage: !!payload.monumentImage,
+      hasSceneImage: !!payload.sceneImage,
+      promptLength: payload.compositePrompt.length
+    });
+
     const response = await fetch('/api/composite', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({
-        compositePrompt: finalCompositePrompt
-      })
+      body: JSON.stringify(payload)
     });
 
     if (!response.ok) {
