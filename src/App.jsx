@@ -288,39 +288,61 @@ export default function MonumentGenerator() {
     }
   };
 
-  const downloadImage = (imageUrl, filename) => {
-    if (!imageUrl) return;
-    
-    const link = document.createElement('a');
-    link.href = imageUrl;
-    link.download = filename;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  };
-
   const shareImage = async () => {
-    if (!finalImage) return;
+  if (!finalImage) return;
 
-    try {
-      const response = await fetch(finalImage);
-      const blob = await response.blob();
-      const file = new File([blob], 'monument.jpg', { type: 'image/jpeg' });
-
-      if (navigator.share && navigator.canShare({ files: [file] })) {
-        await navigator.share({
-          files: [file],
-          title: 'My Monument Creation',
-          text: 'Check out this monument I created!'
-        });
-      } else {
-        setError('Sharing not supported on this device. Please use the download button.');
-      }
-    } catch (err) {
-      console.error('Error sharing:', err);
-      setError('Could not share image. Please try downloading instead.');
+  try {
+    // Check if Web Share API is supported
+    if (!navigator.share) {
+      // Fallback: Just download the image
+      downloadImage(finalImage, `monument-final-${Date.now()}.jpg`);
+      alert('Sharing not supported on this browser. Image has been downloaded instead!');
+      return;
     }
-  };
+
+    // Convert base64 to blob
+    const base64Response = await fetch(finalImage);
+    const blob = await base64Response.blob();
+    
+    // Create file from blob
+    const file = new File([blob], `monument-${Date.now()}.jpg`, { 
+      type: 'image/jpeg',
+      lastModified: new Date().getTime()
+    });
+
+    // Check if we can share files
+    if (navigator.canShare && navigator.canShare({ files: [file] })) {
+      await navigator.share({
+        files: [file],
+        title: 'My Monument Creation',
+        text: 'Check out this amazing monument I created with AI!'
+      });
+    } else {
+      // Fallback: Share without file (just text and URL if available)
+      await navigator.share({
+        title: 'My Monument Creation',
+        text: 'Check out this amazing monument I created with AI! Download to see the full image.'
+      });
+      
+      // Also download the image
+      downloadImage(finalImage, `monument-final-${Date.now()}.jpg`);
+    }
+  } catch (err) {
+    // User cancelled or error occurred
+    if (err.name === 'AbortError') {
+      console.log('Share cancelled by user');
+      return;
+    }
+    
+    console.error('Error sharing:', err);
+    // Fallback to download
+    downloadImage(finalImage, `monument-final-${Date.now()}.jpg`);
+    setError('Could not share image. Image has been downloaded instead!');
+    
+    // Clear error after 3 seconds
+    setTimeout(() => setError(''), 3000);
+  }
+};
 
   const resetAndStartOver = () => {
     setStep(1);
