@@ -14,10 +14,15 @@ export default async function handler(req, res) {
   }
 
   try {
+    // Extract base64 data from the image
     const base64Data = image.split(',')[1];
     const mimeType = image.split(';')[0].split(':')[1];
 
-    const prompt = 'Describe this scene in detail for the purpose of placing a monument in it. Include information about: the location type (park, plaza, street, etc.), lighting conditions, weather, surrounding elements (buildings, trees, people), ground surface, and overall atmosphere. Keep the description concise but detailed, around 2-3 sentences.';
+    if (!base64Data) {
+      throw new Error('Invalid image format');
+    }
+
+    const prompt = 'Describe this scene in detail for the purpose of placing a monument in it. Include information about: the location type (park, plaza, street, city, nature, etc.), lighting conditions (sunny, cloudy, evening, etc.), weather, surrounding elements (buildings, trees, people, vehicles, etc.), ground surface (grass, pavement, sand, etc.), and overall atmosphere. Keep the description concise but detailed, around 2-3 sentences.';
 
     const contentParts = [
       {
@@ -46,7 +51,8 @@ export default async function handler(req, res) {
             temperature: 0.7,
             topP: 0.95,
             topK: 40,
-            maxOutputTokens: 1024
+            maxOutputTokens: 1024,
+            responseMimeType: "text/plain"
           }
         })
       }
@@ -55,6 +61,7 @@ export default async function handler(req, res) {
     const data = await response.json();
 
     if (!response.ok) {
+      console.error('Gemini API Error in describe-scene:', data);
       return res.status(500).json({ 
         error: data.error?.message || 'Failed to describe scene',
         details: data 
@@ -78,7 +85,7 @@ export default async function handler(req, res) {
 
     return res.status(200).json({ description });
   } catch (error) {
-    console.error('Error:', error);
-    return res.status(500).json({ error: error.message });
+    console.error('Error in describe-scene:', error);
+    return res.status(500).json({ error: error.message || 'Failed to describe scene' });
   }
 }
