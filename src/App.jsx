@@ -1,18 +1,24 @@
 import React, { useState } from 'react';
-import { Camera, Loader2, Download, Upload, X, Type, Image, Share2 } from 'lucide-react';
+import { Camera, Loader2, Download, Upload, X, Type, Image, Share2, Edit } from 'lucide-react';
 
 export default function MonumentGenerator() {
   const [step, setStep] = useState(1);
   const [mode, setMode] = useState('text');
   const [prompt, setPrompt] = useState('');
   const [monumentUrl, setMonumentUrl] = useState('');
+  const [monumentDescription, setMonumentDescription] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [uploadedImage, setUploadedImage] = useState(null);
   const [uploadedImagePreview, setUploadedImagePreview] = useState('');
   
+  // Step 2 states
+  const [sceneMode, setSceneMode] = useState('text');
+  const [scenePrompt, setScenePrompt] = useState('');
   const [sceneImage, setSceneImage] = useState(null);
   const [sceneImagePreview, setSceneImagePreview] = useState('');
+  const [sceneDescription, setSceneDescription] = useState('');
+  const [describingScene, setDescribingScene] = useState(false);
   const [finalImage, setFinalImage] = useState('');
   const [compositing, setCompositing] = useState(false);
 
@@ -39,7 +45,7 @@ export default function MonumentGenerator() {
     reader.readAsDataURL(file);
   };
 
-  const handleSceneUpload = (e) => {
+  const handleSceneUpload = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
 
@@ -54,12 +60,48 @@ export default function MonumentGenerator() {
     }
 
     const reader = new FileReader();
-    reader.onloadend = () => {
-      setSceneImage(reader.result);
-      setSceneImagePreview(reader.result);
+    reader.onloadend = async () => {
+      const imageData = reader.result;
+      setSceneImage(imageData);
+      setSceneImagePreview(imageData);
       setError('');
+      
+      // Auto-describe the scene
+      await describeScene(imageData);
     };
     reader.readAsDataURL(file);
+  };
+
+  const describeScene = async (imageData) => {
+    setDescribingScene(true);
+    setSceneDescription('');
+    
+    try {
+      const response = await fetch('/api/describe-scene', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          image: imageData
+        })
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to describe scene');
+      }
+
+      if (data.description) {
+        setSceneDescription(data.description);
+      }
+    } catch (err) {
+      setError('Could not auto-describe scene. Please describe it manually.');
+      console.error('Error:', err);
+    } finally {
+      setDescribingScene(false);
+    }
   };
 
   const removeUploadedImage = () => {
@@ -70,6 +112,7 @@ export default function MonumentGenerator() {
   const removeSceneImage = () => {
     setSceneImage(null);
     setSceneImagePreview('');
+    setSceneDescription('');
   };
 
   const switchMode = (newMode) => {
@@ -82,6 +125,16 @@ export default function MonumentGenerator() {
     setMode(newMode);
     setError('');
     setMonumentUrl('');
+    setMonumentDescription('');
+  };
+
+  const switchSceneMode = (newMode) => {
+    setSceneMode(newMode);
+    setScenePrompt('');
+    setSceneImage(null);
+    setSceneImagePreview('');
+    setSceneDescription('');
+    setError('');
   };
 
   const generateMonument = async () => {
@@ -98,6 +151,7 @@ export default function MonumentGenerator() {
     setLoading(true);
     setError('');
     setMonumentUrl('');
+    setMonumentDescription('');
 
     try {
       const response = await fetch('/api/generate', {
@@ -120,6 +174,7 @@ export default function MonumentGenerator() {
 
       if (data.imageUrl) {
         setMonumentUrl(data.imageUrl);
+        setMonumentDescription(data.description || (mode === 'text' ? prompt : 'A monument based on the uploaded image'));
       } else {
         throw new Error('No image data received');
       }
@@ -132,8 +187,18 @@ export default function MonumentGenerator() {
   };
 
   const compositeImages = async () => {
-    if (!monumentUrl || !sceneImage) {
-      setError('Please make sure you have both a monument and scene image');
+    if (sceneMode === 'text' && !scenePrompt.trim()) {
+      setError('Please describe the scene');
+      return;
+    }
+
+    if (sceneMode === 'image' && !sceneImage) {
+      setError('Please upload a scene image');
+      return;
+    }
+
+    if (sceneMode === 'image' && !sceneDescription.trim()) {
+      setError('Please provide a scene description');
       return;
     }
 
@@ -148,8 +213,10 @@ export default function MonumentGenerator() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          monumentImage: monumentUrl,
-          sceneImage: sceneImage
+          monumentDescription: monumentDescription,
+          sceneMode: sceneMode,
+          sceneDescription: sceneMode === 'text' ? scenePrompt : sceneDescription,
+          sceneImage: sceneMode === 'image' ? sceneImage : null
         })
       });
 
@@ -166,7 +233,7 @@ export default function MonumentGenerator() {
         throw new Error('No final image received');
       }
     } catch (err) {
-      setError(err.message || 'Failed to composite images. Please try again.');
+      setError(err.message || 'Failed to create final image. Please try again.');
       console.error('Error:', err);
     } finally {
       setCompositing(false);
@@ -212,10 +279,14 @@ export default function MonumentGenerator() {
     setMode('text');
     setPrompt('');
     setMonumentUrl('');
+    setMonumentDescription('');
     setUploadedImage(null);
     setUploadedImagePreview('');
+    setSceneMode('text');
+    setScenePrompt('');
     setSceneImage(null);
     setSceneImagePreview('');
+    setSceneDescription('');
     setFinalImage('');
     setError('');
   };
@@ -231,6 +302,7 @@ export default function MonumentGenerator() {
           <p className="text-purple-200">Create stunning monument images using AI - powered by Google Gemini</p>
         </div>
 
+        {/* Step Indicator */}
         <div className="flex items-center justify-center gap-4 mb-8">
           <div className={`flex items-center gap-2 ${step === 1 ? 'text-white' : 'text-purple-300'}`}>
             <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold ${step === 1 ? 'bg-purple-600' : 'bg-purple-800'}`}>
@@ -247,8 +319,10 @@ export default function MonumentGenerator() {
           </div>
         </div>
 
+        {/* STEP 1: Create Monument */}
         {step === 1 && (
           <>
+            {/* Mode Selector */}
             <div className="bg-white/10 backdrop-blur-md rounded-lg p-2 mb-6 border border-purple-400/30 flex gap-2">
               <button
                 onClick={() => switchMode('text')}
@@ -274,6 +348,7 @@ export default function MonumentGenerator() {
               </button>
             </div>
 
+            {/* Text Mode */}
             {mode === 'text' && (
               <div className="bg-white/10 backdrop-blur-md rounded-lg p-6 mb-6 border border-purple-400/30">
                 <label className="block text-white font-semibold mb-2">
@@ -282,12 +357,13 @@ export default function MonumentGenerator() {
                 <textarea
                   value={prompt}
                   onChange={(e) => setPrompt(e.target.value)}
-                  placeholder="E.g., A futuristic glass monument in the shape of a phoenix rising from flames, located in a modern city plaza..."
+                  placeholder="E.g., A futuristic glass monument in the shape of a phoenix rising from flames..."
                   className="w-full px-4 py-3 rounded-lg bg-white/20 text-white placeholder-purple-300 border border-purple-400/30 focus:outline-none focus:ring-2 focus:ring-purple-400 min-h-32 resize-y"
                 />
               </div>
             )}
 
+            {/* Image Mode */}
             {mode === 'image' && (
               <div className="bg-white/10 backdrop-blur-md rounded-lg p-6 mb-6 border border-purple-400/30">
                 <label className="block text-white font-semibold mb-2">
@@ -327,6 +403,7 @@ export default function MonumentGenerator() {
               </div>
             )}
 
+            {/* Generate Monument Button */}
             <button
               onClick={generateMonument}
               disabled={loading || (mode === 'text' && !prompt.trim()) || (mode === 'image' && !uploadedImage)}
@@ -380,62 +457,135 @@ export default function MonumentGenerator() {
             )}
 
             <div className="mt-8 text-center text-purple-300 text-sm">
-              <p>💡 Tip: {mode === 'text' ? 'Be specific with architectural details, materials, and setting for best results' : 'Upload a clear reference image to inspire your monument design'}</p>
+              <p>💡 Tip: {mode === 'text' ? 'Be specific with architectural details, materials, and setting' : 'Upload a clear reference image to inspire your monument'}</p>
             </div>
           </>
         )}
 
+        {/* STEP 2: Add Monument to Scene */}
         {step === 2 && (
           <>
-            <div className="bg-white/10 backdrop-blur-md rounded-lg p-6 mb-6 border border-purple-400/30">
-              <h2 className="text-xl font-semibold text-white mb-4">Your Generated Monument</h2>
+            {/* Monument Preview */}
+            <div className="bg-white/10 backdrop-blur-md rounded-lg p-4 mb-6 border border-purple-400/30">
+              <h3 className="text-lg font-semibold text-white mb-3">Your Monument</h3>
               <img
                 src={monumentUrl}
                 alt="Generated monument"
-                className="w-full rounded-lg shadow-lg mb-4"
+                className="w-full max-h-48 object-contain rounded-lg"
               />
             </div>
 
-            <div className="bg-white/10 backdrop-blur-md rounded-lg p-6 mb-6 border border-purple-400/30">
-              <label className="block text-white font-semibold mb-2">
-                Upload Scene Image
-              </label>
-              <p className="text-purple-200 text-sm mb-4">
-                Upload a background scene where you want to place your monument
-              </p>
-              
-              {!sceneImagePreview ? (
-                <div className="border-2 border-dashed border-purple-400/50 rounded-lg p-8 text-center hover:border-purple-400 transition-colors cursor-pointer">
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={handleSceneUpload}
-                    className="hidden"
-                    id="scene-upload"
-                  />
-                  <label htmlFor="scene-upload" className="cursor-pointer">
-                    <Upload className="w-12 h-12 text-purple-300 mx-auto mb-3" />
-                    <p className="text-purple-200 mb-1">Click to upload a scene</p>
-                    <p className="text-purple-300 text-sm">PNG, JPG, GIF up to 4MB</p>
-                  </label>
-                </div>
-              ) : (
-                <div className="relative">
-                  <img
-                    src={sceneImagePreview}
-                    alt="Scene background"
-                    className="w-full h-64 object-contain rounded-lg bg-black/20"
-                  />
-                  <button
-                    onClick={removeSceneImage}
-                    className="absolute top-2 right-2 bg-red-500 hover:bg-red-600 text-white rounded-full p-2 transition-colors"
-                  >
-                    <X className="w-4 h-4" />
-                  </button>
-                </div>
-              )}
+            {/* Scene Mode Selector */}
+            <div className="bg-white/10 backdrop-blur-md rounded-lg p-2 mb-6 border border-purple-400/30 flex gap-2">
+              <button
+                onClick={() => switchSceneMode('text')}
+                className={`flex-1 py-3 px-4 rounded-lg font-semibold transition-all flex items-center justify-center gap-2 ${
+                  sceneMode === 'text'
+                    ? 'bg-purple-600 text-white'
+                    : 'text-purple-200 hover:bg-white/10'
+                }`}
+              >
+                <Type className="w-5 h-5" />
+                Describe Scene
+              </button>
+              <button
+                onClick={() => switchSceneMode('image')}
+                className={`flex-1 py-3 px-4 rounded-lg font-semibold transition-all flex items-center justify-center gap-2 ${
+                  sceneMode === 'image'
+                    ? 'bg-purple-600 text-white'
+                    : 'text-purple-200 hover:bg-white/10'
+                }`}
+              >
+                <Image className="w-5 h-5" />
+                Upload Scene
+              </button>
             </div>
 
+            {/* Scene Text Mode */}
+            {sceneMode === 'text' && (
+              <div className="bg-white/10 backdrop-blur-md rounded-lg p-6 mb-6 border border-purple-400/30">
+                <label className="block text-white font-semibold mb-2">
+                  Describe the Scene
+                </label>
+                <p className="text-purple-200 text-sm mb-3">
+                  Describe where you want to place your monument
+                </p>
+                <textarea
+                  value={scenePrompt}
+                  onChange={(e) => setScenePrompt(e.target.value)}
+                  placeholder="E.g., A sunny park with green grass, tall trees in the background, a clear blue sky, and people walking on pathways..."
+                  className="w-full px-4 py-3 rounded-lg bg-white/20 text-white placeholder-purple-300 border border-purple-400/30 focus:outline-none focus:ring-2 focus:ring-purple-400 min-h-32 resize-y"
+                />
+              </div>
+            )}
+
+            {/* Scene Image Mode */}
+            {sceneMode === 'image' && (
+              <div className="bg-white/10 backdrop-blur-md rounded-lg p-6 mb-6 border border-purple-400/30">
+                <label className="block text-white font-semibold mb-2">
+                  Upload Scene Image
+                </label>
+                <p className="text-purple-200 text-sm mb-3">
+                  Upload a background scene where you want to place your monument
+                </p>
+                
+                {!sceneImagePreview ? (
+                  <div className="border-2 border-dashed border-purple-400/50 rounded-lg p-8 text-center hover:border-purple-400 transition-colors cursor-pointer">
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleSceneUpload}
+                      className="hidden"
+                      id="scene-upload"
+                    />
+                    <label htmlFor="scene-upload" className="cursor-pointer">
+                      <Upload className="w-12 h-12 text-purple-300 mx-auto mb-3" />
+                      <p className="text-purple-200 mb-1">Click to upload a scene</p>
+                      <p className="text-purple-300 text-sm">PNG, JPG, GIF up to 4MB</p>
+                    </label>
+                  </div>
+                ) : (
+                  <>
+                    <div className="relative mb-4">
+                      <img
+                        src={sceneImagePreview}
+                        alt="Scene background"
+                        className="w-full h-64 object-contain rounded-lg bg-black/20"
+                      />
+                      <button
+                        onClick={removeSceneImage}
+                        className="absolute top-2 right-2 bg-red-500 hover:bg-red-600 text-white rounded-full p-2 transition-colors"
+                      >
+                        <X className="w-4 h-4" />
+                      </button>
+                    </div>
+
+                    {/* Scene Description */}
+                    <div>
+                      <label className="block text-white font-semibold mb-2 flex items-center gap-2">
+                        <Edit className="w-4 h-4" />
+                        Scene Description (editable)
+                      </label>
+                      {describingScene ? (
+                        <div className="flex items-center gap-2 text-purple-200 py-3">
+                          <Loader2 className="w-4 h-4 animate-spin" />
+                          <span>Analyzing scene...</span>
+                        </div>
+                      ) : (
+                        <textarea
+                          value={sceneDescription}
+                          onChange={(e) => setSceneDescription(e.target.value)}
+                          placeholder="AI will describe the scene automatically, but you can edit it..."
+                          className="w-full px-4 py-3 rounded-lg bg-white/20 text-white placeholder-purple-300 border border-purple-400/30 focus:outline-none focus:ring-2 focus:ring-purple-400 min-h-24 resize-y"
+                        />
+                      )}
+                    </div>
+                  </>
+                )}
+              </div>
+            )}
+
+            {/* Action Buttons */}
             <div className="flex gap-4 mb-6">
               <button
                 onClick={() => setStep(1)}
@@ -445,7 +595,11 @@ export default function MonumentGenerator() {
               </button>
               <button
                 onClick={compositeImages}
-                disabled={compositing || !sceneImage}
+                disabled={
+                  compositing || 
+                  (sceneMode === 'text' && !scenePrompt.trim()) || 
+                  (sceneMode === 'image' && (!sceneImage || !sceneDescription.trim()))
+                }
                 className="flex-1 py-4 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-lg font-semibold text-lg hover:from-purple-700 hover:to-pink-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all transform hover:scale-105 active:scale-95 flex items-center justify-center gap-2"
               >
                 {compositing ? (
@@ -456,7 +610,7 @@ export default function MonumentGenerator() {
                 ) : (
                   <>
                     <Camera className="w-5 h-5" />
-                    Create Final Image
+                    Generate Final Image
                   </>
                 )}
               </button>
@@ -468,6 +622,7 @@ export default function MonumentGenerator() {
               </div>
             )}
 
+            {/* Final Result */}
             {finalImage && (
               <div className="bg-white/10 backdrop-blur-md rounded-lg p-6 border border-purple-400/30">
                 <div className="flex items-center justify-between mb-4">
@@ -504,7 +659,7 @@ export default function MonumentGenerator() {
             )}
 
             <div className="mt-8 text-center text-purple-300 text-sm">
-              <p>💡 Tip: Choose a scene that complements your monument for the best results</p>
+              <p>💡 Tip: {sceneMode === 'text' ? 'Be descriptive about lighting, weather, and surroundings' : 'You can edit the AI-generated scene description before creating the final image'}</p>
             </div>
           </>
         )}
