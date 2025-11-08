@@ -31,9 +31,10 @@ export default async function handler(req, res) {
       const base64Data = image.split(',')[1];
       const mimeType = image.split(';')[0].split(':')[1];
 
-      enhancedPrompt = 'Create a detailed, photorealistic monument inspired by this image. The monument should be architectural, grand, and impressive. Transform the elements from this image into a majestic monument structure.';
+      // VERY EXPLICIT PROMPT - Monument must be OF the image content
+      enhancedPrompt = 'IMPORTANT: Look carefully at this image and identify what you see - whether it is a person, animal, object, building, or scene. Create a grand, impressive MONUMENT or STATUE that depicts EXACTLY what you see in this image. The monument should be a 3D sculpture made of materials like bronze, marble, stone, or metal. The statue/monument MUST show the same subject (person, animal, or object) that appears in the uploaded image. For example: if you see a dog, create a dog statue/monument; if you see a person, create a statue of that person; if you see the Eiffel Tower, create a monument version of the Eiffel Tower. The monument should be photorealistic, architectural, and placed in an appropriate setting like a plaza or park. DO NOT create something unrelated - the monument MUST represent what is in this image.';
 
-      monumentDescription = 'A grand monument inspired by the uploaded image, featuring architectural elements transformed into an impressive structure';
+      monumentDescription = 'A grand architectural monument statue depicting the subject from the uploaded image, made of bronze or stone';
 
       contentParts = [
         {
@@ -70,7 +71,7 @@ export default async function handler(req, res) {
             parts: contentParts
           }],
           generationConfig: {
-            temperature: 1,
+            temperature: 0.8,
             topP: 0.95,
             topK: 40,
             maxOutputTokens: 8192,
@@ -84,6 +85,7 @@ export default async function handler(req, res) {
     const data = await response.json();
 
     if (!response.ok) {
+      console.error('Gemini API Error:', data);
       return res.status(500).json({ 
         error: data.error?.message || 'Failed to generate image',
         details: data 
