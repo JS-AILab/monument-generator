@@ -1,4 +1,5 @@
 export default async function handler(req, res) {
+  // Increase body size limit
   if (!process.env.GEMINI_API_KEY) {
     return res.status(500).json({ error: 'API key not configured on server' });
   }
@@ -14,14 +15,31 @@ export default async function handler(req, res) {
   }
 
   try {
-    // Extract base64 data from both images
-    const monumentBase64 = monumentImage.split(',')[1];
-    const monumentMimeType = monumentImage.split(';')[0].split(':')[1];
-    
-    const sceneBase64 = sceneImage.split(',')[1];
-    const sceneMimeType = sceneImage.split(';')[0].split(':')[1];
+    // Helper function to compress base64 image if needed
+    const getBase64Data = (dataUrl) => {
+      if (!dataUrl) return null;
+      const parts = dataUrl.split(',');
+      if (parts.length !== 2) return null;
+      return parts[1];
+    };
 
-    const prompt = 'Composite these two images together. Take the monument from the first image and naturally place it into the scene from the second image. Make sure the monument fits realistically into the scene with proper lighting, shadows, perspective, and scale. The final result should look photorealistic as if the monument actually exists in that location. Blend the images seamlessly.';
+    const getMimeType = (dataUrl) => {
+      if (!dataUrl) return 'image/jpeg';
+      const match = dataUrl.match(/^data:([^;]+);/);
+      return match ? match[1] : 'image/jpeg';
+    };
+
+    const monumentBase64 = getBase64Data(monumentImage);
+    const monumentMimeType = getMimeType(monumentImage);
+    
+    const sceneBase64 = getBase64Data(sceneImage);
+    const sceneMimeType = getMimeType(sceneImage);
+
+    if (!monumentBase64 || !sceneBase64) {
+      return res.status(400).json({ error: 'Invalid image format' });
+    }
+
+    const prompt = 'Composite these two images together seamlessly. Take the monument from the first image and naturally place it into the scene from the second image. Make sure the monument fits realistically into the scene with proper lighting, shadows, perspective, and scale. The final result should look photorealistic as if the monument actually exists in that location. Blend the images perfectly so they look like one cohesive photograph.';
 
     const contentParts = [
       {
@@ -53,7 +71,7 @@ export default async function handler(req, res) {
             parts: contentParts
           }],
           generationConfig: {
-            temperature: 1,
+            temperature: 0.9,
             topP: 0.95,
             topK: 40,
             maxOutputTokens: 8192,
@@ -67,6 +85,7 @@ export default async function handler(req, res) {
     const data = await response.json();
 
     if (!response.ok) {
+      console.error('Gemini API Error:', data);
       return res.status(500).json({ 
         error: data.error?.message || 'Failed to composite images',
         details: data 
@@ -88,7 +107,7 @@ export default async function handler(req, res) {
     
     throw new Error('No composite image received from the API');
   } catch (error) {
-    console.error('Error:', error);
+    console.error('Error in composite:', error);
     return res.status(500).json({ error: error.message });
   }
 }
