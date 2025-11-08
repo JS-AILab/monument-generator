@@ -1,5 +1,4 @@
 export default async function handler(req, res) {
-  // Increase body size limit
   if (!process.env.GEMINI_API_KEY) {
     return res.status(500).json({ error: 'API key not configured on server' });
   }
@@ -8,56 +7,56 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  const { monumentImage, sceneImage } = req.body;
+  const { monumentDescription, sceneMode, sceneDescription, sceneImage } = req.body;
 
-  if (!monumentImage || !sceneImage) {
-    return res.status(400).json({ error: 'Both monument and scene images are required' });
+  if (!monumentDescription) {
+    return res.status(400).json({ error: 'Monument description is required' });
+  }
+
+  if (!sceneMode || (sceneMode !== 'text' && sceneMode !== 'image')) {
+    return res.status(400).json({ error: 'Invalid scene mode' });
+  }
+
+  if (!sceneDescription) {
+    return res.status(400).json({ error: 'Scene description is required' });
+  }
+
+  if (sceneMode === 'image' && !sceneImage) {
+    return res.status(400).json({ error: 'Scene image is required for image mode' });
   }
 
   try {
-    // Helper function to compress base64 image if needed
-    const getBase64Data = (dataUrl) => {
-      if (!dataUrl) return null;
-      const parts = dataUrl.split(',');
-      if (parts.length !== 2) return null;
-      return parts[1];
-    };
+    let contentParts = [];
+    let finalPrompt = '';
 
-    const getMimeType = (dataUrl) => {
-      if (!dataUrl) return 'image/jpeg';
-      const match = dataUrl.match(/^data:([^;]+);/);
-      return match ? match[1] : 'image/jpeg';
-    };
+    if (sceneMode === 'text') {
+      // Text-only mode: Generate scene with monument from descriptions
+      finalPrompt = `Create a photorealistic image of the following scene: ${sceneDescription}. In this scene, place a monument with these characteristics: ${monumentDescription}. The monument should be naturally integrated into the scene with proper lighting, shadows, perspective, and scale. Make it look like the monument truly belongs in this location. The final image should be cohesive and realistic.`;
 
-    const monumentBase64 = getBase64Data(monumentImage);
-    const monumentMimeType = getMimeType(monumentImage);
-    
-    const sceneBase64 = getBase64Data(sceneImage);
-    const sceneMimeType = getMimeType(sceneImage);
+      contentParts = [
+        {
+          text: finalPrompt
+        }
+      ];
+    } else {
+      // Image mode: Composite monument into uploaded scene
+      const base64Data = sceneImage.split(',')[1];
+      const mimeType = sceneImage.split(';')[0].split(':')[1];
 
-    if (!monumentBase64 || !sceneBase64) {
-      return res.status(400).json({ error: 'Invalid image format' });
+      finalPrompt = `Look at this scene image. The scene is described as: ${sceneDescription}. Now, create a new version of this scene but add a monument with these characteristics: ${monumentDescription}. Place the monument naturally into this scene with proper lighting, shadows, perspective, and scale to match the existing environment. The monument should look like it belongs in this location. Make the composite seamless and photorealistic.`;
+
+      contentParts = [
+        {
+          inline_data: {
+            mime_type: mimeType,
+            data: base64Data
+          }
+        },
+        {
+          text: finalPrompt
+        }
+      ];
     }
-
-    const prompt = 'Composite these two images together seamlessly. Take the monument from the first image and naturally place it into the scene from the second image. Make sure the monument fits realistically into the scene with proper lighting, shadows, perspective, and scale. The final result should look photorealistic as if the monument actually exists in that location. Blend the images perfectly so they look like one cohesive photograph.';
-
-    const contentParts = [
-      {
-        inline_data: {
-          mime_type: monumentMimeType,
-          data: monumentBase64
-        }
-      },
-      {
-        inline_data: {
-          mime_type: sceneMimeType,
-          data: sceneBase64
-        }
-      },
-      {
-        text: prompt
-      }
-    ];
 
     const response = await fetch(
       `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent?key=${process.env.GEMINI_API_KEY}`,
@@ -71,7 +70,7 @@ export default async function handler(req, res) {
             parts: contentParts
           }],
           generationConfig: {
-            temperature: 0.9,
+            temperature: 1,
             topP: 0.95,
             topK: 40,
             maxOutputTokens: 8192,
@@ -87,11 +86,12 @@ export default async function handler(req, res) {
     if (!response.ok) {
       console.error('Gemini API Error:', data);
       return res.status(500).json({ 
-        error: data.error?.message || 'Failed to composite images',
+        error: data.error?.message || 'Failed to create final image',
         details: data 
       });
     }
 
+    // Extract generated image
     let foundImage = false;
     if (data.candidates && data.candidates[0] && data.candidates[0].content && data.candidates[0].content.parts) {
       for (const part of data.candidates[0].content.parts) {

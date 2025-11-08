@@ -24,14 +24,16 @@ export default async function handler(req, res) {
   try {
     let enhancedPrompt;
     let contentParts = [];
+    let monumentDescription = '';
 
     if (mode === 'image') {
       // Extract base64 data from uploaded image
       const base64Data = image.split(',')[1];
       const mimeType = image.split(';')[0].split(':')[1];
 
-      // UPDATED PROMPT - More explicit about creating monument FROM the image
-      enhancedPrompt = 'Look at this image carefully. Create a grand, impressive monument sculpture or statue that depicts exactly what you see in this image. The monument should be a 3D architectural structure made of stone, metal, or marble that represents the subject, person, object, or scene from this image. Transform what you see into a photorealistic monument that could exist in a public plaza or park. The monument should clearly show the same subject matter as the uploaded image, but as a majestic statue or architectural monument.';
+      enhancedPrompt = 'Create a detailed, photorealistic monument inspired by this image. The monument should be architectural, grand, and impressive. Transform the elements from this image into a majestic monument structure.';
+
+      monumentDescription = 'A grand monument inspired by the uploaded image, featuring architectural elements transformed into an impressive structure';
 
       contentParts = [
         {
@@ -47,6 +49,7 @@ export default async function handler(req, res) {
     } else {
       // Text mode
       enhancedPrompt = `Create a detailed, photorealistic image of a monument: ${prompt}. The image should be architectural, grand, and impressive.`;
+      monumentDescription = prompt;
       
       contentParts = [
         {
@@ -87,6 +90,7 @@ export default async function handler(req, res) {
       });
     }
 
+    // Look through all parts for an image
     let foundImage = false;
     if (data.candidates && data.candidates[0] && data.candidates[0].content && data.candidates[0].content.parts) {
       for (const part of data.candidates[0].content.parts) {
@@ -95,7 +99,10 @@ export default async function handler(req, res) {
           const mimeType = part.inlineData?.mimeType || part.inline_data?.mime_type || 'image/jpeg';
           const imageUrl = `data:${mimeType};base64,${imageData}`;
           
-          return res.status(200).json({ imageUrl });
+          return res.status(200).json({ 
+            imageUrl: imageUrl,
+            description: monumentDescription 
+          });
         }
       }
     }
