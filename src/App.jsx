@@ -185,55 +185,62 @@ export default function MonumentGenerator() {
     setError('');
   };
 
-  const generateMonument = async () => {
-    if (mode === 'text' && !prompt.trim()) {
-      setError('Please enter a monument description');
-      return;
+const generateMonument = async () => {
+  if (mode === 'text' && !prompt.trim()) {
+    setError('Please enter a monument description');
+    return;
+  }
+
+  if (mode === 'image' && !uploadedImage) {
+    setError('Please upload an image');
+    return;
+  }
+
+  setLoading(true);
+  setError('');
+  setMonumentUrl('');
+  setMonumentDescription('');
+
+  try {
+    const response = await fetch('/api/generate', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        mode: mode,
+        prompt: mode === 'text' ? prompt : null,
+        image: mode === 'image' ? uploadedImage : null
+      })
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.error || 'Failed to generate monument');
     }
 
-    if (mode === 'image' && !uploadedImage) {
-      setError('Please upload an image');
-      return;
-    }
-
-    setLoading(true);
-    setError('');
-    setMonumentUrl('');
-    setMonumentDescription('');
-
-    try {
-      const response = await fetch('/api/generate', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          mode: mode,
-          prompt: mode === 'text' ? prompt : null,
-          image: mode === 'image' ? uploadedImage : null
-        })
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || 'Failed to generate monument');
+    if (data.imageUrl) {
+      // Compress the monument image before storing for Step 2
+      try {
+        const compressedMonument = await compressImage(data.imageUrl, 800);
+        setMonumentUrl(compressedMonument); // Store compressed version
+      } catch (compressErr) {
+        console.error('Error compressing monument:', compressErr);
+        setMonumentUrl(data.imageUrl); // Fallback to original
       }
-
-      if (data.imageUrl) {
-        setMonumentUrl(data.imageUrl);
-        setMonumentDescription(data.description || (mode === 'text' ? prompt : 'A monument based on the uploaded image'));
-      } else {
-        throw new Error('No image data received');
-      }
-    } catch (err) {
-      setError(err.message || 'Failed to generate monument. Please try again.');
-      console.error('Error:', err);
-    } finally {
-      setLoading(false);
+      
+      setMonumentDescription(data.description || (mode === 'text' ? prompt : 'A monument based on the uploaded image'));
+    } else {
+      throw new Error('No image data received');
     }
-  };
-
+  } catch (err) {
+    setError(err.message || 'Failed to generate monument. Please try again.');
+    console.error('Error:', err);
+  } finally {
+    setLoading(false);
+  }
+};
   const compositeImages = async () => {
   if (sceneMode === 'text' && !scenePrompt.trim()) {
     setError('Please describe the scene');
