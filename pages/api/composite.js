@@ -31,7 +31,18 @@ export default async function handler(req, res) {
 
     if (sceneMode === 'text') {
       // Text-only mode: Generate scene with monument from descriptions
-      finalPrompt = `Create a photorealistic image of the following scene: ${sceneDescription}. In this scene, place a monument with these characteristics: ${monumentDescription}. The monument should be naturally integrated into the scene with proper lighting, shadows, perspective, and scale. Make it look like the monument truly belongs in this location. The final image should be cohesive and realistic.`;
+      finalPrompt = `Create a photorealistic image showing this exact monument: ${monumentDescription}
+
+Place this monument in the following scene: ${sceneDescription}
+
+IMPORTANT INSTRUCTIONS:
+- The monument MUST match the description exactly - same subject, materials, style, and features
+- Place the monument prominently in the center or focal point of the scene
+- The monument should be the main subject of the image
+- Add proper lighting, shadows, and reflections to make it look realistic
+- Ensure the monument's scale fits naturally in the scene
+- The scene should complement and frame the monument
+- Make it look like a real photograph of an actual monument in this location`;
 
       contentParts = [
         {
@@ -43,7 +54,21 @@ export default async function handler(req, res) {
       const base64Data = sceneImage.split(',')[1];
       const mimeType = sceneImage.split(';')[0].split(':')[1];
 
-      finalPrompt = `Look at this scene image. The scene is described as: ${sceneDescription}. Now, create a new version of this scene but add a monument with these characteristics: ${monumentDescription}. Place the monument naturally into this scene with proper lighting, shadows, perspective, and scale to match the existing environment. The monument should look like it belongs in this location. Make the composite seamless and photorealistic.`;
+      finalPrompt = `Look at this scene image. The scene shows: ${sceneDescription}
+
+Now, I need you to CREATE A NEW IMAGE that shows this exact monument: ${monumentDescription}
+
+Place this monument INTO the scene from the image. 
+
+CRITICAL REQUIREMENTS:
+- The monument MUST match the description exactly - same subject, materials, pose, and all features described
+- Place the monument prominently in a natural location within this scene
+- The monument should be the main focal point
+- Add realistic lighting that matches the scene's lighting conditions
+- Add proper shadows cast by the monument
+- Ensure the monument's size and perspective match the scene
+- Make it look like a real photograph where this monument actually exists in this location
+- The final image should be seamless and photorealistic`;
 
       contentParts = [
         {
@@ -70,7 +95,7 @@ export default async function handler(req, res) {
             parts: contentParts
           }],
           generationConfig: {
-            temperature: 1,
+            temperature: 0.9,
             topP: 0.95,
             topK: 40,
             maxOutputTokens: 8192,
