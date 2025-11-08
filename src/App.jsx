@@ -160,6 +160,12 @@ const [generatingPrompt, setGeneratingPrompt] = useState(false);
 };
 
 const generateCompositePrompt = async (sceneDesc) => {
+  if (!monumentDescription) {
+    console.error('No monument description available');
+    setCompositePrompt(`${sceneDesc}. In this scene, there is a monument.`);
+    return;
+  }
+
   setGeneratingPrompt(true);
   
   try {
@@ -188,9 +194,10 @@ const generateCompositePrompt = async (sceneDesc) => {
     }
   } catch (err) {
     console.error('Error generating composite prompt:', err);
-    setError(`Could not generate composite description. Please edit manually.`);
-    // Provide a basic fallback
-    setCompositePrompt(`${sceneDesc} In this scene, there is ${monumentDescription}`);
+    // Provide a detailed fallback
+    const fallbackPrompt = `A photorealistic scene: ${sceneDesc}. In the center of this scene stands ${monumentDescription}. The monument is the main focal point, positioned prominently with realistic lighting conditions matching the scene. Shadows are cast naturally on the surrounding ground. The scale and perspective of the monument fit naturally within the environment. The overall composition is balanced and professional.`;
+    setCompositePrompt(fallbackPrompt);
+    setError('Using fallback description. You can edit it before generating.');
   } finally {
     setGeneratingPrompt(false);
   }
@@ -293,8 +300,29 @@ const generateMonument = async () => {
     return;
   }
 
-  if (sceneMode === 'image' && !compositePrompt.trim()) {
-    setError('Please provide a composite description');
+  if (sceneMode === 'image' && !sceneImage) {
+    setError('Please upload a scene image');
+    return;
+  }
+
+  // Build composite prompt if not already set
+  let finalCompositePrompt = '';
+  
+  if (sceneMode === 'text') {
+    // Text mode: Simple combination
+    finalCompositePrompt = `A photorealistic scene: ${scenePrompt}. In this scene, prominently placed is ${monumentDescription}. The monument should be the focal point with proper lighting, shadows, and integration into the environment.`;
+  } else {
+    // Image mode: Use generated composite prompt or create fallback
+    if (compositePrompt.trim()) {
+      finalCompositePrompt = compositePrompt;
+    } else {
+      // Fallback if composite prompt generation failed
+      finalCompositePrompt = `A photorealistic scene: ${sceneDescription}. In the center of this scene stands ${monumentDescription}. The monument is prominently displayed with realistic lighting, shadows cast on the ground, and proper scale and perspective matching the environment.`;
+    }
+  }
+
+  if (!finalCompositePrompt.trim()) {
+    setError('Could not generate scene description. Please try again.');
     return;
   }
 
@@ -303,15 +331,6 @@ const generateMonument = async () => {
   setFinalImage('');
 
   try {
-    // For text mode, create a simple composite prompt
-    let finalCompositePrompt = '';
-    
-    if (sceneMode === 'text') {
-      finalCompositePrompt = `${scenePrompt}. In this scene, prominently placed is ${monumentDescription}`;
-    } else {
-      finalCompositePrompt = compositePrompt;
-    }
-
     const response = await fetch('/api/composite', {
       method: 'POST',
       headers: {
@@ -736,12 +755,12 @@ const generateMonument = async () => {
               >
                 ← Back
               </button>
-              <button
+             <button
   onClick={compositeImages}
   disabled={
     compositing || 
     (sceneMode === 'text' && !scenePrompt.trim()) || 
-    (sceneMode === 'image' && (!sceneImage || !compositePrompt.trim()))
+    (sceneMode === 'image' && !sceneImage)
   }
   className="flex-1 py-4 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-lg font-semibold text-lg hover:from-purple-700 hover:to-pink-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all transform hover:scale-105 active:scale-95 flex items-center justify-center gap-2"
 >
