@@ -7,7 +7,7 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  const { monumentDescription, sceneMode, sceneDescription, sceneImage } = req.body;
+  const { monumentImage, monumentDescription, sceneMode, sceneDescription, sceneImage } = req.body;
 
   if (!monumentDescription) {
     return res.status(400).json({ error: 'Monument description is required' });
@@ -30,57 +30,114 @@ export default async function handler(req, res) {
     let finalPrompt = '';
 
     if (sceneMode === 'text') {
-      // Text-only mode: Generate scene with monument from descriptions
-      finalPrompt = `Create a photorealistic image showing this exact monument: ${monumentDescription}
+      // Text-only mode: Generate scene with monument
+      if (monumentImage) {
+        // If we have the monument image, include it
+        const monumentBase64 = monumentImage.split(',')[1];
+        const monumentMimeType = monumentImage.split(';')[0].split(':')[1];
 
-Place this monument in the following scene: ${sceneDescription}
+        finalPrompt = `Look at this monument image. This is the EXACT monument that must appear in the final image.
 
-IMPORTANT INSTRUCTIONS:
-- The monument MUST match the description exactly - same subject, materials, style, and features
-- Place the monument prominently in the center or focal point of the scene
-- The monument should be the main subject of the image
-- Add proper lighting, shadows, and reflections to make it look realistic
-- Ensure the monument's scale fits naturally in the scene
-- The scene should complement and frame the monument
-- Make it look like a real photograph of an actual monument in this location`;
-
-      contentParts = [
-        {
-          text: finalPrompt
-        }
-      ];
-    } else {
-      // Image mode: Composite monument into uploaded scene
-      const base64Data = sceneImage.split(',')[1];
-      const mimeType = sceneImage.split(';')[0].split(':')[1];
-
-      finalPrompt = `Look at this scene image. The scene shows: ${sceneDescription}
-
-Now, I need you to CREATE A NEW IMAGE that shows this exact monument: ${monumentDescription}
-
-Place this monument INTO the scene from the image. 
+Now create a photorealistic image that shows THIS EXACT SAME monument placed in the following scene: ${sceneDescription}
 
 CRITICAL REQUIREMENTS:
-- The monument MUST match the description exactly - same subject, materials, pose, and all features described
-- Place the monument prominently in a natural location within this scene
-- The monument should be the main focal point
-- Add realistic lighting that matches the scene's lighting conditions
-- Add proper shadows cast by the monument
-- Ensure the monument's size and perspective match the scene
+- Use the EXACT monument from the image provided - same appearance, materials, details
+- Do not recreate or redesign the monument - use it exactly as shown
+- Place this monument prominently in the scene described
+- Add proper lighting, shadows, and reflections to match the scene
+- Make it look like a real photograph of this monument in that location
+- The monument should be the main focal point`;
+
+        contentParts = [
+          {
+            inline_data: {
+              mime_type: monumentMimeType,
+              data: monumentBase64
+            }
+          },
+          {
+            text: finalPrompt
+          }
+        ];
+      } else {
+        // Fallback without monument image
+        finalPrompt = `Create a photorealistic image showing this monument: ${monumentDescription}
+
+Place it in this scene: ${sceneDescription}
+
+Make the monument prominent and realistic with proper lighting and shadows.`;
+
+        contentParts = [
+          {
+            text: finalPrompt
+          }
+        ];
+      }
+    } else {
+      // Image mode: Composite monument into uploaded scene
+      const sceneBase64 = sceneImage.split(',')[1];
+      const sceneMimeType = sceneImage.split(';')[0].split(':')[1];
+
+      if (monumentImage) {
+        // Send BOTH monument image and scene image
+        const monumentBase64 = monumentImage.split(',')[1];
+        const monumentMimeType = monumentImage.split(';')[0].split(':')[1];
+
+        finalPrompt = `You are given TWO images:
+1. FIRST IMAGE: A monument/statue
+2. SECOND IMAGE: A scene/background
+
+TASK: Create a NEW photorealistic image that shows the EXACT monument from the first image placed naturally into the scene from the second image.
+
+Scene description: ${sceneDescription}
+
+CRITICAL REQUIREMENTS:
+- Take the EXACT monument from the first image - do not recreate or modify it
+- Place this monument into the scene from the second image
+- The monument should look like it naturally belongs in that scene
+- Add realistic lighting that matches the scene's lighting
+- Add proper shadows cast by the monument onto the ground/surroundings
+- Adjust the monument's size and perspective to fit naturally in the scene
 - Make it look like a real photograph where this monument actually exists in this location
 - The final image should be seamless and photorealistic`;
 
-      contentParts = [
-        {
-          inline_data: {
-            mime_type: mimeType,
-            data: base64Data
+        contentParts = [
+          {
+            inline_data: {
+              mime_type: monumentMimeType,
+              data: monumentBase64
+            }
+          },
+          {
+            inline_data: {
+              mime_type: sceneMimeType,
+              data: sceneBase64
+            }
+          },
+          {
+            text: finalPrompt
           }
-        },
-        {
-          text: finalPrompt
-        }
-      ];
+        ];
+      } else {
+        // Fallback without monument image - use description only
+        finalPrompt = `Look at this scene image: ${sceneDescription}
+
+Create a new version of this scene with this monument added: ${monumentDescription}
+
+Place the monument naturally with proper lighting and shadows.`;
+
+        contentParts = [
+          {
+            inline_data: {
+              mime_type: sceneMimeType,
+              data: sceneBase64
+            }
+          },
+          {
+            text: finalPrompt
+          }
+        ];
+      }
     }
 
     const response = await fetch(
@@ -95,7 +152,7 @@ CRITICAL REQUIREMENTS:
             parts: contentParts
           }],
           generationConfig: {
-            temperature: 0.9,
+            temperature: 0.7,
             topP: 0.95,
             topK: 40,
             maxOutputTokens: 8192,
@@ -117,7 +174,6 @@ CRITICAL REQUIREMENTS:
     }
 
     // Extract generated image
-    let foundImage = false;
     if (data.candidates && data.candidates[0] && data.candidates[0].content && data.candidates[0].content.parts) {
       for (const part of data.candidates[0].content.parts) {
         if (part.inlineData || part.inline_data) {
