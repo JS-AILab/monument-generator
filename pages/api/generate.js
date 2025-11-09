@@ -31,29 +31,35 @@ export default async function handler(req, res) {
       const base64Data = image.split(',')[1];
       const mimeType = image.split(';')[0].split(':')[1];
 
-      // STEP 1: Create monument FROM the uploaded image
-      enhancedPrompt = `IMPORTANT: Look carefully at this image and identify what you see - whether it is a person, animal, object, building, or scene. 
+      // STEP 1: Create ONLY the monument - NO SCENE, NO BACKGROUND
+      enhancedPrompt = `IMPORTANT: Look carefully at this image and identify what you see - whether it is a person, animal, object, building, or scene.
 
-Create a grand, impressive MONUMENT or STATUE that depicts EXACTLY what you see in this image. 
+Create ONLY a monument or statue that depicts EXACTLY what you see in this image.
 
-The monument should be:
-- A 3D sculpture made of materials like bronze, marble, stone, or metal
-- The statue/monument MUST show the same subject (person, animal, or object) that appears in the uploaded image
-- For example: if you see a dog, create a dog statue/monument; if you see a person, create a statue of that person; if you see the Eiffel Tower, create a monument version of the Eiffel Tower
-- Photorealistic and architectural
-- Placed in an appropriate setting like a plaza or park
+CRITICAL REQUIREMENTS:
+- Create ONLY the monument/statue itself
+- NO background, NO scene, NO setting, NO environment
+- The monument should be isolated on a plain, neutral background (white, grey, or transparent-looking)
+- The statue/monument MUST show the same subject (person, animal, or object) from the uploaded image
+- Made of materials like bronze, marble, stone, or metal
+- 3D sculpture, detailed and realistic
+- For example: if you see a dog, create ONLY a dog statue with no park or plaza
+- If you see a person, create ONLY the statue of that person with no background elements
 
-DO NOT create something unrelated - the monument MUST represent what is in this image.
+DO NOT include:
+- No parks, plazas, or outdoor settings
+- No pedestals or bases (unless specifically part of the monument design)
+- No surrounding environment
+- No sky, ground, or landscape
+- Just the monument itself
 
-After creating the image, also provide a detailed text description of the monument you created. Include:
+After creating the image, provide a detailed text description of the monument including:
 - What subject/object the monument depicts
-- What material it's made of (bronze, marble, stone, metal, etc.)
-- The size (large, massive, towering, life-size, etc.)
-- The pose or position
-- Any distinctive architectural or sculptural features
-- The style (classical, modern, abstract-realistic, etc.)
-
-This description will help recreate this exact monument in different scenes later.`;
+- Material (bronze, marble, stone, metal, etc.)
+- Size description (large, massive, towering, life-size, etc.)
+- Pose or position
+- Distinctive features
+- Style (classical, modern, etc.)`;
 
       contentParts = [
         {
@@ -67,23 +73,25 @@ This description will help recreate this exact monument in different scenes late
         }
       ];
 
-      // Default description in case AI doesn't provide text
-      monumentDescription = 'A grand architectural monument statue depicting the subject from the uploaded image, made of bronze or stone, towering and impressive, with detailed sculptural features in a classical-modern style';
+      monumentDescription = 'A grand architectural monument statue depicting the subject from the uploaded image, made of bronze or stone, detailed and impressive';
 
     } else {
-      // TEXT MODE: Create monument from text description
-      enhancedPrompt = `Create a detailed, photorealistic image of a monument: ${prompt}. 
+      // TEXT MODE: Create ONLY monument from text description - NO SCENE
+      enhancedPrompt = `Create a detailed, photorealistic monument: ${prompt}
 
-The monument should be:
-- Architectural and grand
+CRITICAL REQUIREMENTS:
+- Create ONLY the monument/statue itself
+- NO background, NO scene, NO setting
+- Plain neutral background (white, grey, or minimal)
+- The monument should be isolated and clearly visible
 - Made of impressive materials like bronze, marble, or stone
-- Placed in an appropriate setting
-- Impressive and monumental in scale
+- Detailed and realistic sculpture
 
-Make it look like a real monument that could exist.`;
+DO NOT include parks, plazas, pedestals, or any environmental elements. Just the monument.
 
-      // For text mode, use the user's prompt as the description
-      monumentDescription = `A grand monument: ${prompt}. Made of bronze or stone, impressive and architectural in scale.`;
+After creating the image, provide a description of the monument's appearance, materials, size, and features.`;
+
+      monumentDescription = `A grand monument: ${prompt}. Made of bronze or stone, impressive and detailed.`;
       
       contentParts = [
         {
@@ -152,7 +160,6 @@ Make it look like a real monument that could exist.`;
     }
 
     // Use AI's description if it provided one, otherwise use our default
-    // AI's description is better because it describes what it ACTUALLY created
     const finalDescription = aiDescription && aiDescription.length > 20 
       ? aiDescription 
       : monumentDescription;
