@@ -446,20 +446,20 @@ const generateMonument = async () => {
 };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 p-8">
+   <div className="min-h-screen bg-gradient-to-br from-blue-50 to-gray-100 p-8">
       <div className="max-w-4xl mx-auto">
         <div className="text-center mb-8">
           <div className="flex items-center justify-center gap-3 mb-4">
-            <Camera className="w-10 h-10 text-purple-400" />
-            <h1 className="text-4xl font-bold text-white">Monument Generator</h1>
-          </div>
-          <p className="text-purple-200">Create stunning monument images using AI - powered by Google Gemini</p>
+  <Camera className="w-10 h-10 text-blue-600" />
+  <h1 className="text-4xl font-bold text-gray-800">Monument Generator</h1>
+</div>
+<p className="text-gray-600">Create stunning monument images using AI - powered by Google Gemini</p>
         </div>
 
         {/* Step Indicator */}
         <div className="flex items-center justify-center gap-4 mb-8">
-          <div className={`flex items-center gap-2 ${step === 1 ? 'text-white' : 'text-purple-300'}`}>
-            <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold ${step === 1 ? 'bg-purple-600' : 'bg-purple-800'}`}>
+          <div className={`flex items-center gap-2 ${step === 1 ? 'text-blue-600' : 'text-gray-500'}`}>
+  <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold ${step === 1 ? 'bg-blue-600 text-white' : 'bg-gray-300 text-gray-600'}`}>
               1
             </div>
             <span className="font-semibold">Create Monument</span>
