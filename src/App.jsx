@@ -606,7 +606,7 @@ const generateMonument = async () => {
               </div>
             )}
 
-            <div <p className="text-gray-600 text-sm">
+            <div className="text-gray-600 text-sm">
               <p>💡 Tip: {mode === 'text' ? 'Be specific with architectural details, materials, and setting' : 'Upload a clear reference image to inspire your monument'}</p>
             </div>
           </>
