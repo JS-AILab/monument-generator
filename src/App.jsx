@@ -660,7 +660,7 @@ const generateMonument = async () => {
                   value={scenePrompt}
                   onChange={(e) => setScenePrompt(e.target.value)}
                   placeholder="E.g., A sunny park with green grass, tall trees in the background, a clear blue sky, and people walking on pathways..."
-                  className=className="px-4 py-3 rounded-lg bg-blue-50 text-gray-700 text-sm border border-blue-100"
+                  className="px-4 py-3 rounded-lg bg-blue-50 text-gray-700 text-sm border border-blue-100"
                 />
               </div>
             )}
