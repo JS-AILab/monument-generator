@@ -729,7 +729,7 @@ const generateMonument = async () => {
             This describes the final scene with your monument in it
           </p>
           {describingScene || generatingPrompt ? (
-            <div <label className="block text-gray-800 font-semibold mb-2 flex items-center gap-2">
+            <div className="block text-gray-800 font-semibold mb-2 flex items-center gap-2">
               <Loader2 className="w-4 h-4 animate-spin" />
               <span>
                 {describingScene ? 'Analyzing scene...' : 'Creating composite description...'}
