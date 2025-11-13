@@ -27,53 +27,62 @@ export default async function handler(req, res) {
     let monumentDescription = '';
 
     if (mode === 'image') {
-      // Extract base64 data from uploaded image
-      const base64Data = image.split(',')[1];
-      const mimeType = image.split(';')[0].split(':')[1];
+  // Extract base64 data from uploaded image
+  const base64Data = image.split(',')[1];
+  const mimeType = image.split(';')[0].split(':')[1];
 
-      // STEP 1: Create ONLY the monument - NO SCENE, NO BACKGROUND
-      enhancedPrompt = `IMPORTANT: Look carefully at this image and identify what you see - whether it is a person, animal, object, building, or scene.
+  // STEP 1: Create ONLY the monument - NO SCENE, NO BACKGROUND
+  enhancedPrompt = `CRITICAL INSTRUCTION: Analyze this image VERY CAREFULLY. Identify EXACTLY what you see.
 
-Create ONLY a monument or statue that depicts EXACTLY what you see in this image.
+If you see a WOMAN or FEMALE PERSON:
+- Create a monument/statue of THAT EXACT WOMAN
+- The monument must depict a FEMALE person
+- Capture her pose, appearance, and features as a statue
 
-CRITICAL REQUIREMENTS:
-- Create ONLY the monument/statue itself
-- NO background, NO scene, NO setting, NO environment
-- The monument should be isolated on a plain, neutral background (white, grey, or transparent-looking)
-- The statue/monument MUST show the same subject (person, animal, or object) from the uploaded image
-- Made of materials like bronze, marble, stone, or metal
-- 3D sculpture, detailed and realistic
-- For example: if you see a dog, create ONLY a dog statue with no park or plaza
-- If you see a person, create ONLY the statue of that person with no background elements
+If you see a MAN or MALE PERSON:
+- Create a monument/statue of THAT EXACT MAN
+- The monument must depict a MALE person
 
-DO NOT include:
-- No parks, plazas, or outdoor settings
-- No pedestals or bases (unless specifically part of the monument design)
-- No surrounding environment
-- No sky, ground, or landscape
-- Just the monument itself
+If you see a DOG:
+- Create a dog statue/monument
 
-After creating the image, provide a detailed text description of the monument including:
-- What subject/object the monument depicts
-- Material (bronze, marble, stone, metal, etc.)
-- Size description (large, massive, towering, life-size, etc.)
-- Pose or position
-- Distinctive features
-- Style (classical, modern, etc.)`;
+If you see a CAT:
+- Create a cat statue/monument
 
-      contentParts = [
-        {
-          inline_data: {
-            mime_type: mimeType,
-            data: base64Data
-          }
-        },
-        {
-          text: enhancedPrompt
-        }
-      ];
+If you see ANY OTHER SUBJECT:
+- Create a monument of THAT EXACT SUBJECT
 
-      monumentDescription = 'A grand architectural monument statue depicting the subject from the uploaded image, made of bronze or stone, detailed and impressive';
+ABSOLUTELY CRITICAL RULES:
+1. Look at the image FIRST before creating anything
+2. The monument MUST match what you see in the image
+3. If you see a woman, DO NOT create a dog or any other animal
+4. If you see a man, DO NOT create a woman or animal
+5. The subject in the monument MUST be the SAME as the subject in the uploaded image
+6. Create ONLY the monument/statue on a plain neutral background
+7. NO parks, plazas, or environmental elements
+8. Made of bronze, marble, stone, or metal
+9. Detailed, 3D, realistic sculpture
+
+DO NOT:
+- Change the subject (woman → dog, man → cat, etc.)
+- Add background scenes
+- Create something different from what you see
+
+Describe the monument you create, including what subject it depicts.`;
+
+  contentParts = [
+    {
+      inline_data: {
+        mime_type: mimeType,
+        data: base64Data
+      }
+    },
+    {
+      text: enhancedPrompt
+    }
+  ];
+
+  monumentDescription = 'A grand architectural monument statue depicting the subject from the uploaded image, made of bronze or stone, detailed and impressive';
 
     } else {
       // TEXT MODE: Create ONLY monument from text description - NO SCENE
