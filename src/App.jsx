@@ -446,20 +446,20 @@ const generateMonument = async () => {
 };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 p-8">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-gray-100 p-8">
       <div className="max-w-4xl mx-auto">
         <div className="text-center mb-8">
           <div className="flex items-center justify-center gap-3 mb-4">
-            <Camera className="w-10 h-10 text-purple-400" />
-            <h1 className="text-4xl font-bold text-white">Monument Generator</h1>
+            <Camera className="w-10 h-10 text-blue-600" />
+            <h1 className="text-4xl font-bold text-gray-800">Monument Generator</h1>
           </div>
-          <p className="text-purple-200">Create stunning monument images using AI - powered by Google Gemini</p>
+          <p className="text-gray-600">Create stunning monument images using AI - powered by Google Gemini</p>
         </div>
 
         {/* Step Indicator */}
         <div className="flex items-center justify-center gap-4 mb-8">
-          <div className={`flex items-center gap-2 ${step === 1 ? 'text-white' : 'text-purple-300'}`}>
-            <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold ${step === 1 ? 'bg-purple-600' : 'bg-purple-800'}`}>
+          <div className={`flex items-center gap-2 ${step === 2 ? 'text-blue-600' : 'text-gray-500'}`}>
+            <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold ${step === 2 ? 'bg-blue-600 text-white' : 'bg-gray-300 text-gray-600'}`}>
               1
             </div>
             <span className="font-semibold">Create Monument</span>
@@ -477,13 +477,11 @@ const generateMonument = async () => {
         {step === 1 && (
           <>
             {/* Mode Selector */}
-            <div className="bg-white/10 backdrop-blur-md rounded-lg p-2 mb-6 border border-purple-400/30 flex gap-2">
+            <div className="bg-white rounded-lg p-2 mb-6 border border-gray-200 shadow-sm flex gap-2">
               <button
                 onClick={() => switchMode('text')}
                 className={`flex-1 py-3 px-4 rounded-lg font-semibold transition-all flex items-center justify-center gap-2 ${
-                  mode === 'text'
-                    ? 'bg-purple-600 text-white'
-                    : 'text-purple-200 hover:bg-white/10'
+                  mmode === 'text' ? 'bg-blue-600 text-white shadow-md' : 'text-gray-700 hover:bg-gray-100'
                 }`}
               >
                 <Type className="w-5 h-5" />
@@ -492,9 +490,7 @@ const generateMonument = async () => {
               <button
                 onClick={() => switchMode('image')}
                 className={`flex-1 py-3 px-4 rounded-lg font-semibold transition-all flex items-center justify-center gap-2 ${
-                  mode === 'image'
-                    ? 'bg-purple-600 text-white'
-                    : 'text-purple-200 hover:bg-white/10'
+                  mode === 'image' ? 'bg-blue-600 text-white shadow-md' : 'text-gray-700 hover:bg-gray-100'
                 }`}
               >
                 <Image className="w-5 h-5" />
@@ -504,7 +500,7 @@ const generateMonument = async () => {
 
             {/* Text Mode */}
             {mode === 'text' && (
-              <div className="bg-white/10 backdrop-blur-md rounded-lg p-6 mb-6 border border-purple-400/30">
+              <div className="bg-white rounded-lg p-6 mb-6 border border-gray-200 shadow-sm">
                 <label className="block text-white font-semibold mb-2">
                   Describe Your Monument
                 </label>
@@ -512,20 +508,20 @@ const generateMonument = async () => {
                   value={prompt}
                   onChange={(e) => setPrompt(e.target.value)}
                   placeholder="E.g., A futuristic glass monument in the shape of a phoenix rising from flames..."
-                  className="w-full px-4 py-3 rounded-lg bg-white/20 text-white placeholder-purple-300 border border-purple-400/30 focus:outline-none focus:ring-2 focus:ring-purple-400 min-h-32 resize-y"
+                  className="w-full px-4 py-3 rounded-lg bg-gray-50 text-gray-800 placeholder-gray-400 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent min-h-32 resize-y"
                 />
               </div>
             )}
 
             {/* Image Mode */}
             {mode === 'image' && (
-              <div className="bg-white/10 backdrop-blur-md rounded-lg p-6 mb-6 border border-purple-400/30">
-                <label className="block text-white font-semibold mb-2">
+              <div className="bg-white rounded-lg p-6 mb-6 border border-gray-200 shadow-sm">
+                <label className="block text-gray-800 font-semibold mb-2">
                   Upload Reference Image
                 </label>
                 
                 {!uploadedImagePreview ? (
-                  <div className="border-2 border-dashed border-purple-400/50 rounded-lg p-8 text-center hover:border-purple-400 transition-colors cursor-pointer">
+                  <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-blue-500 transition-colors cursor-pointer bg-gray-50">
                     <input
                       type="file"
                       accept="image/*"
@@ -534,9 +530,9 @@ const generateMonument = async () => {
                       id="image-upload"
                     />
                     <label htmlFor="image-upload" className="cursor-pointer">
-                      <Upload className="w-12 h-12 text-purple-300 mx-auto mb-3" />
-                      <p className="text-purple-200 mb-1">Click to upload an image</p>
-                      <p className="text-purple-300 text-sm">PNG, JPG, GIF up to 4MB</p>
+                      <Upload className="w-12 h-12 text-gray-400 mx-auto mb-3" />
+                      <p className="text-gray-700 mb-1">Click to upload an image</p>
+                      <p className="text-gray-500 text-sm">PNG, JPG, GIF up to 4MB</p>
                     </label>
                   </div>
                 ) : (
@@ -544,11 +540,11 @@ const generateMonument = async () => {
                     <img
                       src={uploadedImagePreview}
                       alt="Uploaded reference"
-                      className="w-full h-64 object-contain rounded-lg bg-black/20"
+                      className="w-full h-64 object-contain rounded-lg bg-gray-50 border border-gray-200"
                     />
                     <button
                       onClick={removeUploadedImage}
-                      className="absolute top-2 right-2 bg-red-500 hover:bg-red-600 text-white rounded-full p-2 transition-colors"
+                      className="absolute top-2 right-2 bg-red-500 hover:bg-red-600 text-white rounded-full p-2 transition-colors shadow-lg"
                     >
                       <X className="w-4 h-4" />
                     </button>
@@ -561,7 +557,7 @@ const generateMonument = async () => {
             <button
               onClick={generateMonument}
               disabled={loading || (mode === 'text' && !prompt.trim()) || (mode === 'image' && !uploadedImage)}
-              className="w-full py-4 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-lg font-semibold text-lg hover:from-purple-700 hover:to-pink-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all transform hover:scale-105 active:scale-95 flex items-center justify-center gap-2 mb-6"
+              className="w-full py-4 bg-blue-600 text-white rounded-lg font-semibold text-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-2 mb-6"
             >
               {loading ? (
                 <>
@@ -577,26 +573,26 @@ const generateMonument = async () => {
             </button>
 
             {error && (
-              <div className="bg-red-500/20 border border-red-500/50 rounded-lg p-4 mb-6">
-                <p className="text-red-200">{error}</p>
+              <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
+                <p className="text-red-700">{error}</p>
               </div>
             )}
 
             {monumentUrl && (
-              <div className="bg-white/10 backdrop-blur-md rounded-lg p-6 border border-purple-400/30">
+              <div className="bg-white rounded-lg p-6 border border-gray-200 shadow-sm">
                 <div className="flex items-center justify-between mb-4">
-                  <h2 className="text-xl font-semibold text-white">Your Monument</h2>
+                  <h2 className="text-xl font-semibold text-gray-800">Your Monument</h2>
                   <div className="flex gap-2">
                     <button
                       onClick={() => downloadImage(monumentUrl, `monument-${Date.now()}.jpg`)}
-                      className="flex items-center gap-2 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
+                      className="flex items-center gap-2 px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors shadow-sm"
                     >
                       <Download className="w-4 h-4" />
                       Download
                     </button>
                     <button
                       onClick={() => setStep(2)}
-                      className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+                      className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors shadow-sm"
                     >
                       Next Step →
                     </button>
@@ -605,12 +601,12 @@ const generateMonument = async () => {
                 <img
                   src={monumentUrl}
                   alt="Generated monument"
-                  className="w-full rounded-lg shadow-2xl"
+                  className="w-full rounded-lg shadow-md border border-gray-200"
                 />
               </div>
             )}
 
-            <div className="mt-8 text-center text-purple-300 text-sm">
+            <div <p className="text-gray-600 text-sm">
               <p>💡 Tip: {mode === 'text' ? 'Be specific with architectural details, materials, and setting' : 'Upload a clear reference image to inspire your monument'}</p>
             </div>
           </>
@@ -620,23 +616,21 @@ const generateMonument = async () => {
         {step === 2 && (
           <>
             {/* Monument Preview */}
-            <div className="bg-white/10 backdrop-blur-md rounded-lg p-4 mb-6 border border-purple-400/30">
-              <h3 className="text-lg font-semibold text-white mb-3">Your Monument</h3>
+            <div className="bg-white rounded-lg p-4 mb-6 border border-gray-200 shadow-sm">
+              <h3 className="text-lg font-semibold text-gray-800 mb-3">Your Monument</h3>
               <img
                 src={monumentUrl}
                 alt="Generated monument"
-                className="w-full max-h-48 object-contain rounded-lg"
+                className="w-full max-h-48 object-contain rounded-lg border border-gray-200"
               />
             </div>
 
             {/* Scene Mode Selector */}
-            <div className="bg-white/10 backdrop-blur-md rounded-lg p-2 mb-6 border border-purple-400/30 flex gap-2">
+            <div className="bg-white rounded-lg p-2 mb-6 border border-gray-200 shadow-sm flex gap-2">
               <button
                 onClick={() => switchSceneMode('text')}
                 className={`flex-1 py-3 px-4 rounded-lg font-semibold transition-all flex items-center justify-center gap-2 ${
-                  sceneMode === 'text'
-                    ? 'bg-purple-600 text-white'
-                    : 'text-purple-200 hover:bg-white/10'
+                  sceneMode === 'text' ? 'bg-blue-600 text-white shadow-md' : 'text-gray-700 hover:bg-gray-100'
                 }`}
               >
                 <Type className="w-5 h-5" />
@@ -645,9 +639,7 @@ const generateMonument = async () => {
               <button
                 onClick={() => switchSceneMode('image')}
                 className={`flex-1 py-3 px-4 rounded-lg font-semibold transition-all flex items-center justify-center gap-2 ${
-                  sceneMode === 'image'
-                    ? 'bg-purple-600 text-white'
-                    : 'text-purple-200 hover:bg-white/10'
+                  sceneMode === 'image' ? 'bg-blue-600 text-white shadow-md' : 'text-gray-700 hover:bg-gray-100'
                 }`}
               >
                 <Image className="w-5 h-5" />
@@ -657,18 +649,18 @@ const generateMonument = async () => {
 
             {/* Scene Text Mode */}
             {sceneMode === 'text' && (
-              <div className="bg-white/10 backdrop-blur-md rounded-lg p-6 mb-6 border border-purple-400/30">
-                <label className="block text-white font-semibold mb-2">
+              <div className="bg-white rounded-lg p-6 mb-6 border border-gray-200 shadow-sm">
+                <label className="block text-gray-800 font-semibold mb-2">
                   Describe the Scene
                 </label>
-                <p className="text-purple-200 text-sm mb-3">
+                <p className="text-gray-600 text-sm mb-3">
                   Describe where you want to place your monument
                 </p>
                 <textarea
                   value={scenePrompt}
                   onChange={(e) => setScenePrompt(e.target.value)}
                   placeholder="E.g., A sunny park with green grass, tall trees in the background, a clear blue sky, and people walking on pathways..."
-                  className="w-full px-4 py-3 rounded-lg bg-white/20 text-white placeholder-purple-300 border border-purple-400/30 focus:outline-none focus:ring-2 focus:ring-purple-400 min-h-32 resize-y"
+                  className=className="px-4 py-3 rounded-lg bg-blue-50 text-gray-700 text-sm border border-blue-100"
                 />
               </div>
             )}
@@ -676,16 +668,16 @@ const generateMonument = async () => {
             {/* Scene Image Mode */}
             {/* Scene Image Mode */}
 {sceneMode === 'image' && (
-  <div className="bg-white/10 backdrop-blur-md rounded-lg p-6 mb-6 border border-purple-400/30">
-    <label className="block text-white font-semibold mb-2">
+  <div className="bg-white rounded-lg p-6 mb-6 border border-gray-200 shadow-sm">
+  <label className="block text-gray-800 font-semibold mb-2">
       Upload Scene Image
     </label>
-    <p className="text-purple-200 text-sm mb-3">
+   <p className="text-gray-600 text-sm mb-3">
       Upload a background scene where you want to place your monument
     </p>
     
     {!sceneImagePreview ? (
-      <div className="border-2 border-dashed border-purple-400/50 rounded-lg p-8 text-center hover:border-purple-400 transition-colors cursor-pointer">
+      <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-blue-500 transition-colors cursor-pointer bg-gray-50">
         <input
           type="file"
           accept="image/*"
@@ -696,7 +688,7 @@ const generateMonument = async () => {
         <label htmlFor="scene-upload" className="cursor-pointer">
           <Upload className="w-12 h-12 text-purple-300 mx-auto mb-3" />
           <p className="text-purple-200 mb-1">Click to upload a scene</p>
-          <p className="text-purple-300 text-sm">PNG, JPG, GIF up to 4MB</p>
+          <p className="text-gray-600 text-sm">PNG, JPG, GIF up to 4MB</p>
         </label>
       </div>
     ) : (
@@ -721,7 +713,7 @@ const generateMonument = async () => {
             <label className="block text-white font-semibold mb-2">
               Scene Analysis:
             </label>
-            <div className="px-4 py-3 rounded-lg bg-white/10 text-purple-200 text-sm border border-purple-400/20">
+            <div className="px-4 py-3 rounded-lg bg-blue-50 text-gray-700 text-sm border border-blue-100">
               {sceneDescription}
             </div>
           </div>
@@ -729,15 +721,15 @@ const generateMonument = async () => {
 
         {/* Composite Description (main editable field) */}
         <div>
-          <label className="block text-white font-semibold mb-2 flex items-center gap-2">
+          <label className="block text-gray-800 font-semibold mb-2 flex items-center gap-2">
             <Edit className="w-4 h-4" />
             Complete Scene Description (editable)
           </label>
-          <p className="text-purple-200 text-sm mb-2">
+          <p className="text-gray-600 text-sm mb-2">
             This describes the final scene with your monument in it
           </p>
           {describingScene || generatingPrompt ? (
-            <div className="flex items-center gap-2 text-purple-200 py-3">
+            <div <label className="block text-gray-800 font-semibold mb-2 flex items-center gap-2">
               <Loader2 className="w-4 h-4 animate-spin" />
               <span>
                 {describingScene ? 'Analyzing scene...' : 'Creating composite description...'}
@@ -748,7 +740,7 @@ const generateMonument = async () => {
               value={compositePrompt}
               onChange={(e) => setCompositePrompt(e.target.value)}
               placeholder="AI will generate a complete description combining your monument and scene..."
-              className="w-full px-4 py-3 rounded-lg bg-white/20 text-white placeholder-purple-300 border border-purple-400/30 focus:outline-none focus:ring-2 focus:ring-purple-400 min-h-32 resize-y"
+              className="w-full px-4 py-3 rounded-lg bg-gray-50 text-gray-800 placeholder-gray-400 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent min-h-32 resize-y"
             />
           )}
         </div>
@@ -762,7 +754,7 @@ const generateMonument = async () => {
             <div className="flex gap-4 mb-6">
               <button
                 onClick={() => setStep(1)}
-                className="flex-1 py-4 bg-gray-600 text-white rounded-lg font-semibold hover:bg-gray-700 transition-colors"
+                className="flex-1 py-4 bg-gray-600 text-white rounded-lg font-semibold hover:bg-gray-700 transition-colors shadow-sm"
               >
                 ← Back
               </button>
@@ -773,7 +765,7 @@ const generateMonument = async () => {
     (sceneMode === 'text' && !scenePrompt.trim()) || 
     (sceneMode === 'image' && !sceneImage)
   }
-  className="flex-1 py-4 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-lg font-semibold text-lg hover:from-purple-700 hover:to-pink-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all transform hover:scale-105 active:scale-95 flex items-center justify-center gap-2"
+  className="flex-1 py-4 bg-blue-600 text-white rounded-lg font-semibold text-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-2"
 >
                 {compositing ? (
                   <>
@@ -790,27 +782,27 @@ const generateMonument = async () => {
             </div>
 
             {error && (
-              <div className="bg-red-500/20 border border-red-500/50 rounded-lg p-4 mb-6">
-                <p className="text-red-200">{error}</p>
+              <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
+                <p className="text-red-700">{error}</p>
               </div>
             )}
 
             {/* Final Result */}
             {finalImage && (
-              <div className="bg-white/10 backdrop-blur-md rounded-lg p-6 border border-purple-400/30">
+              <div className="bg-white rounded-lg p-6 border border-gray-200 shadow-sm">
                 <div className="flex items-center justify-between mb-4">
-                  <h2 className="text-xl font-semibold text-white">Final Creation</h2>
+                  <h2 className="text-xl font-semibold text-gray-800">Final Creation</h2>
                   <div className="flex gap-2">
                     <button
                       onClick={shareImage}
-                      className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                      className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors shadow-sm"
                     >
                       <Share2 className="w-4 h-4" />
                       Share
                     </button>
                     <button
                       onClick={() => downloadImage(finalImage, `monument-final-${Date.now()}.jpg`)}
-                      className="flex items-center gap-2 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
+                      className="flex items-center gap-2 px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors shadow-sm"
                     >
                       <Download className="w-4 h-4" />
                       Download
@@ -820,18 +812,18 @@ const generateMonument = async () => {
                 <img
                   src={finalImage}
                   alt="Final monument in scene"
-                  className="w-full rounded-lg shadow-2xl mb-4"
+                  className="w-full rounded-lg shadow-md border border-gray-200 mb-4"
                 />
                 <button
                   onClick={resetAndStartOver}
-                  className="w-full py-3 bg-green-600 text-white rounded-lg font-semibold hover:bg-green-700 transition-colors"
+                  className="w-full rounded-lg shadow-md border border-gray-200 mb-4"
                 >
                   Create Another Monument
                 </button>
               </div>
             )}
 
-            <div className="mt-8 text-center text-purple-300 text-sm">
+            <div className="mt-8 text-center text-gray-600 text-sm">
               <p>💡 Tip: {sceneMode === 'text' ? 'Be descriptive about lighting, weather, and surroundings' : 'You can edit the AI-generated scene description before creating the final image'}</p>
             </div>
           </>
