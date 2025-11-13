@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Camera, Loader2, Download, Upload, X, Type, Image, Share2, Edit } from 'lucide-react';
 
