@@ -464,9 +464,9 @@ const generateMonument = async () => {
             </div>
             <span className="font-semibold">Create Monument</span>
           </div>
-          <div className="w-12 h-0.5 bg-purple-600"></div>
-          <div className={`flex items-center gap-2 ${step === 2 ? 'text-white' : 'text-purple-300'}`}>
-            <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold ${step === 2 ? 'bg-purple-600' : 'bg-purple-800'}`}>
+          <div className="w-12 h-0.5 bg-gray-300"></div>
+<div className={`flex items-center gap-2 ${step === 2 ? 'text-blue-600' : 'text-gray-500'}`}>
+  <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold ${step === 2 ? 'bg-blue-600 text-white' : 'bg-gray-300 text-gray-600'}`}>
               2
             </div>
             <span className="font-semibold">Add to Scene</span>
@@ -686,8 +686,8 @@ const generateMonument = async () => {
           id="scene-upload"
         />
         <label htmlFor="scene-upload" className="cursor-pointer">
-          <Upload className="w-12 h-12 text-purple-300 mx-auto mb-3" />
-          <p className="text-purple-200 mb-1">Click to upload a scene</p>
+<Upload className="w-12 h-12 text-gray-400 mx-auto mb-3" />
+<p className="text-gray-700 mb-1">Click to upload a scene</p>
           <p className="text-gray-600 text-sm">PNG, JPG, GIF up to 4MB</p>
         </label>
       </div>
