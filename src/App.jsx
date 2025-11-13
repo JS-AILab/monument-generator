@@ -481,7 +481,7 @@ const generateMonument = async () => {
               <button
                 onClick={() => switchMode('text')}
                 className={`flex-1 py-3 px-4 rounded-lg font-semibold transition-all flex items-center justify-center gap-2 ${
-                  mmode === 'text' ? 'bg-blue-600 text-white shadow-md' : 'text-gray-700 hover:bg-gray-100'
+                  mode === 'text' ? 'bg-blue-600 text-white shadow-md' : 'text-gray-700 hover:bg-gray-100'
                 }`}
               >
                 <Type className="w-5 h-5" />
