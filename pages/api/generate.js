@@ -82,7 +82,7 @@ Describe the monument you create, including what subject it depicts.`;
     }
   ];
 
-  monumentDescription = 'A grand architectural monument statue depicting the subject from the uploaded image, made of bronze or stone, detailed and impressive';
+  monumentDescription = 'A  monument statue depicting the subject from the uploaded image, made of bronze or stone, detailed and impressive';
 
     } else {
       // TEXT MODE: Create ONLY monument from text description - NO SCENE
@@ -100,7 +100,7 @@ DO NOT include parks, plazas, pedestals, or any environmental elements. Just the
 
 After creating the image, provide a description of the monument's appearance, materials, size, and features.`;
 
-      monumentDescription = `A grand monument: ${prompt}. Made of bronze or stone, impressive and detailed.`;
+      monumentDescription = `A  monument: ${prompt}. Made of bronze or stone, impressive and detailed.`;
       
       contentParts = [
         {
