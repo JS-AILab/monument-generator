@@ -25,41 +25,40 @@ if (monumentImage && sceneImage) {
   const sceneBase64 = sceneImage.split(',')[1];
   const sceneMimeType = sceneImage.split(';')[0].split(':')[1];
 
-  // UPDATED PROMPT - PRESERVE SCENE EXACTLY
-  const enhancedPrompt = `You are provided with THREE inputs:
-1. FIRST IMAGE: The monument/statue that must be added
-2. SECOND IMAGE: The scene/background (THIS MUST NOT CHANGE)
-3. TEXT DESCRIPTION: Details about the composition
+  const enhancedPrompt = `You are provided with:
+1. FIRST IMAGE: A monument/statue
+2. SECOND IMAGE: A scene/location
+3. DESCRIPTION: ${compositePrompt}
 
-Description: ${compositePrompt}
+TASK: Create a photorealistic image showing the monument from image 1 placed naturally IN the scene from image 2.
 
-CRITICAL TASK - PRESERVE THE SCENE:
-Your job is to take the monument from the first image and place it INTO the second image WITHOUT changing the scene.
+CRITICAL PLACEMENT REQUIREMENTS:
+✓ The monument MUST be placed ON THE GROUND/SURFACE
+✓ The monument must be STANDING on the ground, not floating in air
+✓ The BASE of the monument should touch the ground/floor/pavement
+✓ Add realistic shadows UNDER and AROUND the monument
+✓ The monument should look GROUNDED and stable
+✓ Match the perspective - if scene is at eye level, monument should be at eye level
+✓ The monument should be integrated INTO the scene, not pasted on top
 
-STRICT REQUIREMENTS:
-✓ USE the EXACT scene from the second image - do NOT recreate it
-✓ KEEP all elements in the scene exactly as they are:
-  - Same buildings, trees, objects
-  - Same colors, lighting, atmosphere  
-  - Same perspective and composition
-  - Same weather conditions
-  - Same people or vehicles (if any)
-✓ ONLY ADD the monument from the first image into this existing scene
-✓ Place the monument naturally in the scene (center, foreground, or as described)
-✓ Add realistic shadows from the monument onto the ground
-✓ Match the monument's lighting to the scene's existing lighting
-✓ Adjust monument size/scale to fit naturally
+LIGHTING & INTEGRATION:
+✓ Match the lighting from the scene (sunny, cloudy, indoor, etc.)
+✓ Cast shadows from the monument onto the ground
+✓ The monument's lighting should match the scene's light direction
+✓ Add reflections if ground is wet/shiny
+✓ Blend the monument naturally with its surroundings
 
-DO NOT:
-✗ Recreate or redraw the background scene
-✗ Change colors, lighting, or atmosphere of the scene
-✗ Move or remove existing elements from the scene
-✗ Change the perspective or composition
-✗ Add new elements to the scene (except the monument)
+SCENE PRESERVATION:
+✓ Keep the original scene's elements (buildings, trees, sky, etc.)
+✓ Do not drastically change the scene
+✓ Only add the monument and its shadows
 
-THINK OF IT AS: Photo editing/compositing - inserting the monument into an existing photograph, NOT generating a new scene.
+THINK OF IT AS:
+- The monument is a real, heavy sculpture that sits firmly on the ground
+- NOT floating, NOT hovering, NOT suspended in air
+- Placed naturally like it's been there permanently
 
-The result should look like someone Photoshopped the monument into the original scene photo.`;
+The result should look like a real photograph of an actual monument that exists in that location.`;
 
   contentParts = [
     {
