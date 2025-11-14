@@ -17,79 +17,68 @@ export default async function handler(req, res) {
     let contentParts = [];
 
     // Build content parts based on what images are available
-    if (monumentImage && sceneImage) {
-      // BEST CASE: We have both images + detailed prompt
-      const monumentBase64 = monumentImage.split(',')[1];
-      const monumentMimeType = monumentImage.split(';')[0].split(':')[1];
-      
-      const sceneBase64 = sceneImage.split(',')[1];
-      const sceneMimeType = sceneImage.split(';')[0].split(':')[1];
+if (monumentImage && sceneImage) {
+  // BEST CASE: We have both images + detailed prompt
+  const monumentBase64 = monumentImage.split(',')[1];
+  const monumentMimeType = monumentImage.split(';')[0].split(':')[1];
+  
+  const sceneBase64 = sceneImage.split(',')[1];
+  const sceneMimeType = sceneImage.split(';')[0].split(':')[1];
 
-      const enhancedPrompt = `You are provided with THREE inputs:
-1. FIRST IMAGE: The monument that must appear in the final result
-2. SECOND IMAGE: The scene/background setting
-3. TEXT DESCRIPTION: Detailed description of how they should be combined
+  // UPDATED PROMPT - PRESERVE SCENE EXACTLY
+  const enhancedPrompt = `You are provided with THREE inputs:
+1. FIRST IMAGE: The monument/statue that must be added
+2. SECOND IMAGE: The scene/background (THIS MUST NOT CHANGE)
+3. TEXT DESCRIPTION: Details about the composition
 
-Here is the detailed description of the final scene:
-${compositePrompt}
+Description: ${compositePrompt}
 
-TASK: Create a photorealistic composite image that:
-- Uses visual elements from the monument in the first image
-- Uses the scene setting and environment from the second image  
-- Follows the detailed description provided
-- Places the monument naturally into the scene with proper:
-  * Lighting that matches the scene
-  * Shadows cast by the monument
-  * Correct scale and perspective
-  * Natural integration and composition
+CRITICAL TASK - PRESERVE THE SCENE:
+Your job is to take the monument from the first image and place it INTO the second image WITHOUT changing the scene.
 
-The monument should look like it actually exists in this location. Make it seamless and photorealistic.`;
+STRICT REQUIREMENTS:
+✓ USE the EXACT scene from the second image - do NOT recreate it
+✓ KEEP all elements in the scene exactly as they are:
+  - Same buildings, trees, objects
+  - Same colors, lighting, atmosphere  
+  - Same perspective and composition
+  - Same weather conditions
+  - Same people or vehicles (if any)
+✓ ONLY ADD the monument from the first image into this existing scene
+✓ Place the monument naturally in the scene (center, foreground, or as described)
+✓ Add realistic shadows from the monument onto the ground
+✓ Match the monument's lighting to the scene's existing lighting
+✓ Adjust monument size/scale to fit naturally
 
-      contentParts = [
-        {
-          inline_data: {
-            mime_type: monumentMimeType,
-            data: monumentBase64
-          }
-        },
-        {
-          inline_data: {
-            mime_type: sceneMimeType,
-            data: sceneBase64
-          }
-        },
-        {
-          text: enhancedPrompt
-        }
-      ];
+DO NOT:
+✗ Recreate or redraw the background scene
+✗ Change colors, lighting, or atmosphere of the scene
+✗ Move or remove existing elements from the scene
+✗ Change the perspective or composition
+✗ Add new elements to the scene (except the monument)
 
-    } else if (monumentImage) {
-      // We have monument image + prompt (text-based scene)
-      const monumentBase64 = monumentImage.split(',')[1];
-      const monumentMimeType = monumentImage.split(';')[0].split(':')[1];
+THINK OF IT AS: Photo editing/compositing - inserting the monument into an existing photograph, NOT generating a new scene.
 
-      const enhancedPrompt = `You are provided with:
-1. IMAGE: The monument that must appear in the final result
-2. TEXT DESCRIPTION: Detailed description of the complete scene
+The result should look like someone Photoshopped the monument into the original scene photo.`;
 
-Here is the description:
-${compositePrompt}
-
-TASK: Create a photorealistic image that shows the monument from the provided image placed in the scene described in the text. Follow the description exactly and ensure proper lighting, shadows, and natural integration.`;
-
-      contentParts = [
-        {
-          inline_data: {
-            mime_type: monumentMimeType,
-            data: monumentBase64
-          }
-        },
-        {
-          text: enhancedPrompt
-        }
-      ];
-
-    } else {
+  contentParts = [
+    {
+      inline_data: {
+        mime_type: monumentMimeType,
+        data: monumentBase64
+      }
+    },
+    {
+      inline_data: {
+        mime_type: sceneMimeType,
+        data: sceneBase64
+      }
+    },
+    {
+      text: enhancedPrompt
+    }
+  ];
+} else {
       // Fallback: Text only (if images failed to send)
       const enhancedPrompt = `Create a photorealistic image based on this detailed description:
 
@@ -116,13 +105,13 @@ The image should be highly detailed, properly lit with realistic shadows, and co
             parts: contentParts
           }],
           generationConfig: {
-            temperature: 0.9,
-            topP: 0.95,
-            topK: 40,
-            maxOutputTokens: 8192,
-            responseMimeType: "text/plain",
-            responseModalities: ["TEXT", "IMAGE"]
-          }
+  temperature: 0.5,  // Lower for more accuracy to original scene
+  topP: 0.9,
+  topK: 30,
+  maxOutputTokens: 8192,
+  responseMimeType: "text/plain",
+  responseModalities: ["TEXT", "IMAGE"]
+}
         })
       }
     );
