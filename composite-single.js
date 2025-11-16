@@ -100,7 +100,7 @@ Create a scene that looks like a real photograph of an actual monument that has 
             parts: contentParts
           }],
           generationConfig: {
-            temperature: 0.7,
+            temperature: 0.3,
             topP: 0.9,
             topK: 30,
             maxOutputTokens: 8192,
