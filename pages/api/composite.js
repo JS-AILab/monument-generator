@@ -15,75 +15,142 @@ export default async function handler(req, res) {
 
   try {
     let contentParts = [];
+    let finalPrompt = '';
 
-    // Build content parts based on what images are available
-if (monumentImage && sceneImage) {
-  // BEST CASE: We have both images + detailed prompt
-  const monumentBase64 = monumentImage.split(',')[1];
-  const monumentMimeType = monumentImage.split(';')[0].split(':')[1];
-  
-  const sceneBase64 = sceneImage.split(',')[1];
-  const sceneMimeType = sceneImage.split(';')[0].split(':')[1];
+    if (monumentImage && sceneImage) {
+      // BEST CASE: We have both images + detailed prompt
+      const monumentBase64 = monumentImage.split(',')[1];
+      const monumentMimeType = monumentImage.split(';')[0].split(':')[1];
+      
+      const sceneBase64 = sceneImage.split(',')[1];
+      const sceneMimeType = sceneImage.split(';')[0].split(':')[1];
 
-  const enhancedPrompt = `You are provided with:
-1. FIRST IMAGE: A monument/statue
-2. SECOND IMAGE: A scene/location
-3. DESCRIPTION: ${compositePrompt}
+      const enhancedPrompt = `TASK: Image compositing/photo editing
 
-TASK: Create a photorealistic image showing the monument from image 1 placed naturally IN the scene from image 2.
+INPUT IMAGES:
+- FIRST IMAGE: A monument/statue (this is what needs to be added)
+- SECOND IMAGE: A background scene (this is where to add it)
 
-CRITICAL PLACEMENT REQUIREMENTS:
+YOUR JOB: Create ONE single output image that shows the monument from the first image placed into the scene from the second image.
+
+CRITICAL INSTRUCTIONS FOR THE MONUMENT APPEARANCE:
+1. Look at the FIRST IMAGE carefully - study the monument's appearance
+2. When you place it in the scene, it should look IDENTICAL to how it appears in the first image:
+   - Same pose and position
+   - Same materials (bronze/stone/etc)
+   - Same level of detail
+   - Same proportions
+   - Same facial features (if person/animal)
+   - Same style and finish
+3. DO NOT redesign, recreate, or reinterpret the monument
+4. DO NOT make a simplified or stylized version
+5. DO NOT change how the monument looks
+6. Copy the monument's appearance AS-IS from the first image
+
+CRITICAL PLACEMENT INSTRUCTIONS - MONUMENT MUST BE ON GROUND:
 ✓ The monument MUST be placed ON THE GROUND/SURFACE
 ✓ The monument must be STANDING on the ground, not floating in air
-✓ The BASE of the monument should touch the ground/floor/pavement
-✓ Add realistic shadows UNDER and AROUND the monument
-✓ The monument should look GROUNDED and stable
-✓ Match the perspective - if scene is at eye level, monument should be at eye level
-✓ The monument should be integrated INTO the scene, not pasted on top
+✓ The BASE of the monument should clearly TOUCH the ground/floor/pavement
+✓ The monument should look GROUNDED, STABLE, and HEAVY
+✓ Add realistic shadows UNDER and AROUND the monument on the ground
+✓ The monument should appear to be resting firmly on the surface
+✓ NOT hovering, NOT suspended, NOT floating
+✓ Match the ground level perspective
 
-LIGHTING & INTEGRATION:
-✓ Match the lighting from the scene (sunny, cloudy, indoor, etc.)
-✓ Cast shadows from the monument onto the ground
-✓ The monument's lighting should match the scene's light direction
+LIGHTING & SHADOW INTEGRATION:
+✓ Match the lighting from the scene (sunny, cloudy, indoor, time of day)
+✓ Cast shadows from the monument ONTO the ground
+✓ Shadow direction should match the scene's light source
 ✓ Add reflections if ground is wet/shiny
-✓ Blend the monument naturally with its surroundings
+✓ Monument's lighting should match scene's lighting conditions
+✓ Proper highlights and shadows on the monument surface
 
-SCENE PRESERVATION:
-✓ Keep the original scene's elements (buildings, trees, sky, etc.)
-✓ Do not drastically change the scene
-✓ Only add the monument and its shadows
+SCENE INTEGRATION:
+✓ Use the second image as the background/setting
+✓ Keep the scene's existing elements where possible
+✓ Monument should fit naturally into the environment
+✓ Proper scale and perspective relative to scene
+✓ Monument should be the focal point
+✓ Make it look like the monument has always been there
 
-THINK OF IT AS:
-- The monument is a real, heavy sculpture that sits firmly on the ground
-- NOT floating, NOT hovering, NOT suspended in air
-- Placed naturally like it's been there permanently
+OUTPUT REQUIREMENTS:
+- Create ONE photorealistic image (not a collage)
+- The monument from image 1 placed naturally into scene from image 2
+- Monument standing firmly on the ground with shadows
+- Professional photograph quality
+- Natural and believable integration
 
-The result should look like a real photograph of an actual monument that exists in that location.`;
+Think of this like Photoshop: You're cutting out the monument from image 1 (keeping its exact appearance) and pasting it into image 2, then adding proper shadows and lighting to make it look natural.
 
-  contentParts = [
-    {
-      inline_data: {
-        mime_type: monumentMimeType,
-        data: monumentBase64
-      }
-    },
-    {
-      inline_data: {
-        mime_type: sceneMimeType,
-        data: sceneBase64
-      }
-    },
-    {
-      text: enhancedPrompt
-    }
-  ];
-} else {
+Additional context: ${compositePrompt}`;
+
+      contentParts = [
+        {
+          inline_data: {
+            mime_type: monumentMimeType,
+            data: monumentBase64
+          }
+        },
+        {
+          inline_data: {
+            mime_type: sceneMimeType,
+            data: sceneBase64
+          }
+        },
+        {
+          text: enhancedPrompt
+        }
+      ];
+
+    } else if (monumentImage) {
+      // We have monument image + prompt (text-based scene)
+      const monumentBase64 = monumentImage.split(',')[1];
+      const monumentMimeType = monumentImage.split(';')[0].split(':')[1];
+
+      const enhancedPrompt = `You are provided with:
+1. IMAGE: A monument/statue
+2. TEXT DESCRIPTION: ${compositePrompt}
+
+TASK: Create a photorealistic scene as described in the text, with the monument from the image placed IN that scene.
+
+CRITICAL INSTRUCTIONS:
+✓ Monument should look like the one in the provided image
+✓ Monument MUST be placed ON THE GROUND, standing firmly
+✓ BASE of monument touches the ground
+✓ Add realistic shadows UNDER the monument
+✓ NOT floating or hovering in air
+✓ Integrate naturally with proper lighting and shadows
+✓ Monument is stable and grounded
+
+Create the scene described in the text and place the monument naturally within it.`;
+
+      contentParts = [
+        {
+          inline_data: {
+            mime_type: monumentMimeType,
+            data: monumentBase64
+          }
+        },
+        {
+          text: enhancedPrompt
+        }
+      ];
+
+    } else {
       // Fallback: Text only (if images failed to send)
       const enhancedPrompt = `Create a photorealistic image based on this detailed description:
 
 ${compositePrompt}
 
-The image should be highly detailed, properly lit with realistic shadows, and compositionally balanced. The monument should be the prominent focal point.`;
+CRITICAL REQUIREMENTS:
+✓ Monument must be ON THE GROUND, standing firmly
+✓ Add realistic shadows under and around monument
+✓ Monument is the main focal point
+✓ Proper lighting, perspective, and scale
+✓ Professional, photorealistic quality
+✓ Natural integration into environment
+
+The monument should look grounded and stable, not floating.`;
 
       contentParts = [
         {
@@ -104,13 +171,13 @@ The image should be highly detailed, properly lit with realistic shadows, and co
             parts: contentParts
           }],
           generationConfig: {
-  temperature: 0.5,  // Lower for more accuracy to original scene
-  topP: 0.9,
-  topK: 30,
-  maxOutputTokens: 8192,
-  responseMimeType: "text/plain",
-  responseModalities: ["TEXT", "IMAGE"]
-}
+            temperature: 0.1,
+            topP: 0.8,
+            topK: 10,
+            maxOutputTokens: 8192,
+            responseMimeType: "text/plain",
+            responseModalities: ["TEXT", "IMAGE"]
+          }
         })
       }
     );
