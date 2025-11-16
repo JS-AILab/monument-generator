@@ -22,58 +22,50 @@ export default async function handler(req, res) {
 
     const prompt = `TASK: Create a monument composite image
 
+TASK TYPE: IMAGE INSERTION / PHOTO EDITING (NOT IMAGE GENERATION)
+
+You are not creating a new scene. You are editing the SECOND IMAGE by inserting a monument into it. The SECOND IMAGE must remain identical except for the added statue.
+
+HARD NON-NEGOTIABLE REQUIREMENTS:
+- Use the SECOND IMAGE exactly as the background
+- Do NOT replace, modify, repaint, or regenerate the scene
+- Do NOT change camera angle, lens, perspective, horizon, composition, or cropping
+- ALL original background pixels must remain unless covered by the statue’s base or natural shadow
+- The final result must still look exactly like the SECOND IMAGE, not a new location
+- If the background does not match the original scene, the output is INCORRECT
+
+INSERTION RULES:
+- Add a realistic monument based on the FIRST IMAGE subject
+- Preserve identity: face, body shape, clothing, posture, details
+- Material: bronze, stone, marble, or metal
+- Statue must be firmly grounded in the existing scene surface
+- Add natural shadows following the lighting direction of the scene
+- Match lighting, texture, depth, and color of the environment
+
+FRAMING / SCENE PRESERVATION:
+- Do NOT zoom or crop
+- Do NOT output a close-up
+- Show the entire original scene clearly
+- The statue should take up no more than 30–40% of the frame
+- The environment MUST remain recognizable and unchanged
+
+STRICTLY FORBIDDEN:
+- Generating a new scene/background
+- Changing sky, ground, buildings, foliage, or objects
+- Adding new elements like plaques, flags, crowds, banners, or text
+- Replacing the environment with a “better” setting
+- Converting scene to stylized art or fantasy setting
+
 MONUMENT CREATION:
-- Study the FIRST IMAGE closely to extract identity: facial features, pose, gesture, clothing details, or key design elements.
-- Create a monument statute based on the subject. For human, animal or object, replicate it as a monument exactly as the FIRST IMAGE.
-- Material: Use appropriate sculpture material (e.g., bronze, marble, stone, or metal).
-- Style: Detailed and realistic. Avoid cartoon or stylized effects.
-
-PLACEMENT IN SCENE:
-- Place the monument FIRMLY on the ground in the setting of the SECOND IMAGE.
-- The base of the monument must be aligned with the environment. It should not float.
-- Cast realistic shadows and effects based on light direction in the scene.
-- Match perspective, scale, and lighting based on the SECOND IMAGE.
-
-SCENE INTEGRATION (MOST IMPORTANT):
-- The SECOND IMAGE must remain unchanged and recognizable.
-- Use the original scene AS-IS as the background. Do NOT change the:
-  - Composition
-  - Camera angle
-  - Cropping
-  - Colors or lighting mood
-  - Environment
-  - Buildings, sky, plants, signage, ground, or background elements
-- ONLY ADD the monument to the scene. Do not remove or replace anything in SECOND IMAGE.
-
-FRAMING REQUIREMENTS - IMPORTANT:
-- Show the full scene from SECOND IMAGE, including landmarks, background, ground, foliage, sky, and signage.
-- Do NOT zoom in, crop, or tightly frame the statue.
-- The monument should take up NO MORE THAN ~30–40% of the frame.
-
-LIGHTING & REALISM:
-- Match time of day, light direction, shadows, and ambient lighting.
-- Apply realistic highlights and material textures.
-- The monument must look naturally part of the environment (no harsh edges, mismatched tones, or mismatched shadows).
-
-RESTRICTIONS:
-- Do NOT add or invent new elements (e.g., plaques, crowds, text, banners, flowers) unless already present.
-- Do NOT generate close-ups, alternative frames, cutaways, or standalone statue renderings. A full-scene shot is required.
-- Do NOT crop, zoom, or remove scene context.
-- The output must not be stylized like a concept art or cartoon. It must look like a real photograph.
-
-HARD REQUIREMENTS – DO NOT BREAK THESE RULES:
-- Use SECOND IMAGE exactly as the background. Do NOT replace, recreate, or alter the scene.
-- Do not change the camera angle, layout, perspective, or composition of Image 2.
-- Do not modify, remove, or rearrange any existing elements in the scene.
-- Only ADD the monument. Do not paint over or redesign the scene.
-- The final image must still look like SECOND IMAGE, with the original environment clearly preserved and recognizable.
-- If the result does not visually match the original scene except for the added monument, the output is incorrect.
-
+- Base statue exactly on subject from FIRST IMAGE
+- Preserve facial features and clothing
+- Proportionate, life-size or larger-than-life acceptable
+- Style must be photorealistic
 
 OUTPUT:
-- ONE photorealistic image
-- Scene from Image 2 preserved exactly
-- Monument added as if it were physically built in that location
+ONE photorealistic image
+• SECOND IMAGE background preserved pixel-for-pixel except for statue insertion
+• Monument appears as if physically built in real location
 
 
 Create a scene that looks like a real photograph of an actual monument that has been built in this location.`;
