@@ -24,7 +24,20 @@ export default async function handler(req, res) {
 
 TASK TYPE: IMAGE INSERTION / PHOTO EDITING (NOT IMAGE GENERATION)
 
-You are not creating a new scene. You are editing the SECOND IMAGE by inserting a monument into it. The SECOND IMAGE must remain identical except for the added statue.
+YOU ARE NOT GENERATING A NEW IMAGE.
+YOU ARE MODIFYING IMAGE 2 BY ADDING A MONUMENT BASED ON IMAGE 1.
+
+THIS IS AN IMAGE EDITING TASK.
+THE BACKGROUND FROM IMAGE 2 MUST REMAIN EXACTLY THE SAME.
+
+IMAGE RULES (DO NOT BREAK THESE):
+- Do not generate a new scene
+- Do not replace the background
+- Do not repaint, redesign, re-render, or reinterpret the environment
+- Do not change camera angle, lens, perspective, lighting, or framing
+- Do not crop or zoom
+- Do not remove any existing objects
+- ALL PIXELS IN IMAGE 2 MUST STAY THE SAME except where the statue touches the ground
 
 HARD NON-NEGOTIABLE REQUIREMENTS:
 - Use the SECOND IMAGE exactly as the background
