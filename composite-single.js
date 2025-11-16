@@ -43,13 +43,12 @@ SCENE INTEGRATION (MOST IMPORTANT):
   - Colors or lighting mood
   - Environment
   - Buildings, sky, plants, signage, ground, or background elements
-- ONLY ADD the monument to the scene. Do not remove or replace anything.
+- ONLY ADD the monument to the scene. Do not remove or replace anything in SECOND IMAGE.
 
 FRAMING REQUIREMENTS - IMPORTANT:
-- Show the full scene from Image 2, including landmarks, background, ground, foliage, sky, and signage.
+- Show the full scene from SECOND IMAGE, including landmarks, background, ground, foliage, sky, and signage.
 - Do NOT zoom in, crop, or tightly frame the statue.
 - The monument should take up NO MORE THAN ~30–40% of the frame.
-- Use a wide-angle / establishing-shot camera perspective (24–35mm equivalent).
 
 LIGHTING & REALISM:
 - Match time of day, light direction, shadows, and ambient lighting.
@@ -63,11 +62,11 @@ RESTRICTIONS:
 - The output must not be stylized like a concept art or cartoon. It must look like a real photograph.
 
 HARD REQUIREMENTS – DO NOT BREAK THESE RULES:
-- Use Image 2 exactly as the background. Do NOT replace, recreate, or alter the scene.
+- Use SECOND IMAGE exactly as the background. Do NOT replace, recreate, or alter the scene.
 - Do not change the camera angle, layout, perspective, or composition of Image 2.
 - Do not modify, remove, or rearrange any existing elements in the scene.
 - Only ADD the monument. Do not paint over or redesign the scene.
-- The final image must still look like Image 2, with the original environment clearly preserved and recognizable.
+- The final image must still look like SECOND IMAGE, with the original environment clearly preserved and recognizable.
 - If the result does not visually match the original scene except for the added monument, the output is incorrect.
 
 
