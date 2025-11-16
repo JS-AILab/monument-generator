@@ -23,31 +23,41 @@ export default async function handler(req, res) {
     const prompt = `TASK: Create a monument composite image
 
 MONUMENT CREATION:
-- Accurately preserve identity features of the subject, including facial structure, expression, posture, clothing details, and any defining attributes.
-- Style: Monument should appear large and impactful, made of bronze, stone, metal, or marble. Choose material based on what fits the setting.
-- Keep pose natural and proportional to the subject’s original posture.
-- Avoid stylizing the subject beyond what would be normal for sculpture form.
+- Study the FIRST IMAGE closely to extract identity: facial features, pose, gesture, clothing details, or key design elements.
+- Create a monument statute based on the subject. If human, turn them into a standing statue. If animal or object, replicate it as a monument.
+- Material: Use appropriate sculpture material (e.g., bronze, marble, stone, or metal).
+- Style: Detailed and realistic. Avoid cartoon or stylized effects.
 
-PLACEMENT & CONTEXT:
-- Integrate the monument seamlessly into the SECOND IMAGE’s environment.
-- Place monument firmly on the ground; no floating or misalignments.
-- Ensure proper scale relative to objects and buildings in the scene.
-- Adapt the base/platform of the monument to match scene architecture and ground texture.
-- Respect cultural or environmental cues present in the scene.
+PLACEMENT IN SCENE:
+- Place the monument FIRMLY on the ground in the setting of the SECOND IMAGE.
+- The base of the monument must be aligned with the environment. It should not float.
+- Cast realistic shadows and effects based on light direction in the scene.
+- Match perspective, scale, and lighting based on the SECOND IMAGE.
+
+SCENE PRESERVATION & FRAMING (IMPORTANT):
+- Maintain the full context of the SECOND IMAGE.
+- Use a wide-angle or medium-wide shot. DO NOT zoom in too closely—it must not crop out the environment.
+- Keep buildings, landscape, or features in the SECOND IMAGE clearly visible.
+- The monument should be prominent, but the surrounding scene MUST stay recognizable.
+- Do NOT alter or remove elements from the original scene.
 
 LIGHTING & REALISM:
-- Match lighting, shadows, and perspective to the SECOND IMAGE.
-- Cast shadows consistently based on light direction, time of day.
-- Apply realistic surface reflections and highlights based on material type.
+- Match time of day, light direction, shadows, and ambient lighting.
+- Apply realistic highlights and material textures.
+- The monument must look naturally part of the environment (no harsh edges, mismatched tones, or mismatched shadows).
 
-CONSTRAINTS:
-- Do not add new objects (e.g., plaques, text, crowds, flowers) unless they are already present in the input images.
-- Do not alter the rest of the scene. Keep all scene elements intact.
+RESTRICTIONS:
+- Do NOT add or invent new elements (e.g., plaques, crowds, text, banners, flowers) unless already present.
+- Do NOT generate close-ups, alternative frames, cutaways, or standalone statue renderings. A full-scene shot is required.
+- Do NOT crop, zoom, or remove scene context.
+- The output must not be stylized like a concept art or cartoon. It must look like a real photograph.
 
-OUTPUT REQUIREMENTS:
-- Provide only 1 image.
-- Resolution must match the realism and quality expected from a professional monument photo.
-- Focus on realism, identity preservation, and seamless environmental integration.
+OUTPUT:
+- ONE final image.
+- A wide/medium-wide shot of the monument, fully integrated into the original scene.
+- Monument is accurately based on the FIRST IMAGE and fully placed in the SECOND IMAGE location.
+- Scene context preserved with realistic shadows, perspective, and lighting.
+
 
 Create a scene that looks like a real photograph of an actual monument that has been built in this location.`;
 
