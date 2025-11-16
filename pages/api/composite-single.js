@@ -41,6 +41,13 @@ SCENE PRESERVATION & FRAMING (IMPORTANT):
 - The monument should be prominent, but the surrounding scene MUST stay recognizable.
 - Do NOT alter or remove elements from the original scene.
 
+  FRAMING REQUIREMENTS - IMPORTANT
+- The FINAL image MUST be a wide or medium-wide shot.
+- Show the full scene from Image 2, including landmarks, background, ground, foliage, sky, and signage.
+- Do NOT zoom in, crop, or tightly frame the statue.
+- The monument should take up NO MORE THAN ~30–40% of the frame.
+- Use a wide-angle / establishing-shot camera perspective (24–35mm equivalent).
+
 LIGHTING & REALISM:
 - Match time of day, light direction, shadows, and ambient lighting.
 - Apply realistic highlights and material textures.
