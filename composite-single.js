@@ -46,7 +46,6 @@ SCENE INTEGRATION (MOST IMPORTANT):
 - ONLY ADD the monument to the scene. Do not remove or replace anything.
 
 FRAMING REQUIREMENTS - IMPORTANT:
-- The FINAL image MUST be a wide or medium-wide shot.
 - Show the full scene from Image 2, including landmarks, background, ground, foliage, sky, and signage.
 - Do NOT zoom in, crop, or tightly frame the statue.
 - The monument should take up NO MORE THAN ~30–40% of the frame.
@@ -63,11 +62,19 @@ RESTRICTIONS:
 - Do NOT crop, zoom, or remove scene context.
 - The output must not be stylized like a concept art or cartoon. It must look like a real photograph.
 
+HARD REQUIREMENTS – DO NOT BREAK THESE RULES:
+- Use Image 2 exactly as the background. Do NOT replace, recreate, or alter the scene.
+- Do not change the camera angle, layout, perspective, or composition of Image 2.
+- Do not modify, remove, or rearrange any existing elements in the scene.
+- Only ADD the monument. Do not paint over or redesign the scene.
+- The final image must still look like Image 2, with the original environment clearly preserved and recognizable.
+- If the result does not visually match the original scene except for the added monument, the output is incorrect.
+
+
 OUTPUT:
-- ONE final image.
-- A wide/medium-wide shot of the monument, fully integrated into the original scene.
-- Monument is accurately based on the FIRST IMAGE and fully placed in the SECOND IMAGE location.
-- Scene context preserved with realistic shadows, perspective, and lighting.
+- ONE photorealistic image
+- Scene from Image 2 preserved exactly
+- Monument added as if it were physically built in that location
 
 
 Create a scene that looks like a real photograph of an actual monument that has been built in this location.`;
