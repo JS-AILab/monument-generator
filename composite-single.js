@@ -31,17 +31,17 @@ THIS IS AN IMAGE EDITING TASK.
 THE BACKGROUND FROM IMAGE 2 MUST REMAIN EXACTLY THE SAME.
 
 IMAGE RULES (DO NOT BREAK THESE):
-- Do not generate a new scene
-- Do not replace the background
-- Do not repaint, redesign, re-render, or reinterpret the environment
+- Do not generate a new scene from SCECOND IMAGE
+- Do not replace the background OF SCECOND IMAGE
+- Do not repaint, redesign, re-render, or reinterpret the environment of SCECOND IMAGE
 - Do not change camera angle, lens, perspective, lighting, or framing
-- Do not crop or zoom
-- Do not remove any existing objects
+- Do not crop or zoom the SCECOND IMAGE
+- Do not remove any existing objects in SECOND IMAGE
 - ALL PIXELS IN IMAGE 2 MUST STAY THE SAME except where the statue touches the ground
 
 HARD NON-NEGOTIABLE REQUIREMENTS:
 - Use the SECOND IMAGE exactly as the background
-- Do NOT replace, modify, repaint, or regenerate the scene
+- Do NOT replace, modify, repaint, or regenerate the scene from SCECOND IMAGE
 - Do NOT change camera angle, lens, perspective, horizon, composition, or cropping
 - ALL original background pixels must remain unless covered by the statue’s base or natural shadow
 - The final result must still look exactly like the SECOND IMAGE, not a new location
@@ -57,10 +57,9 @@ INSERTION RULES:
 
 FRAMING / SCENE PRESERVATION:
 - Do NOT zoom or crop
-- Do NOT output a close-up
-- Show the entire original scene clearly
-- The statue should take up no more than 30–40% of the frame
-- The environment MUST remain recognizable and unchanged
+- Show the entire original scene clearly from SECOND IMAGE background
+- The statue should take up no more than 25% of the frame
+- The environment from SECOND IMAGE MUST remain recognizable and unchanged
 
 STRICTLY FORBIDDEN:
 - Generating a new scene/background
