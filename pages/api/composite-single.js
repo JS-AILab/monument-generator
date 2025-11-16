@@ -22,41 +22,32 @@ export default async function handler(req, res) {
 
     const prompt = `TASK: Create a monument composite image
 
-INPUT:
-- FIRST IMAGE: Reference for the monument (what the monument should depict)
-- SECOND IMAGE: The scene/location where to place the monument
-
-YOUR JOB: Create ONE photorealistic image showing a monument/statue based on the first image, placed naturally in the scene from the second image.
-
 MONUMENT CREATION:
-- Study the FIRST IMAGE to understand what to create a monument of
-- If it's a person: Create a statue of that person
-- If it's an animal: Create a statue of that animal
-- If it's an object: Create a monument version of that object
-- Material: Bronze, marble, stone, or metal
-- Style: Detailed, realistic, impressive monument
+- Accurately preserve identity features of the subject, including facial structure, expression, posture, clothing details, and any defining attributes.
+- Style: Monument should appear large and impactful, made of bronze, stone, metal, or marble. Choose material based on what fits the setting.
+- Keep pose natural and proportional to the subject’s original posture.
+- Avoid stylizing the subject beyond what would be normal for sculpture form.
 
-PLACEMENT IN SCENE:
-- Use the SECOND IMAGE as the setting/location
-- Place the monument ON THE GROUND (not floating)
-- The BASE must touch the ground firmly
-- Add realistic shadows UNDER and AROUND the monument
-- Monument should look grounded, stable, and heavy
-- NOT hovering or suspended in air
+PLACEMENT & CONTEXT:
+- Integrate the monument seamlessly into the SECOND IMAGE’s environment.
+- Place monument firmly on the ground; no floating or misalignments.
+- Ensure proper scale relative to objects and buildings in the scene.
+- Adapt the base/platform of the monument to match scene architecture and ground texture.
+- Respect cultural or environmental cues present in the scene.
 
-LIGHTING & INTEGRATION:
-- Match lighting from the scene (sunny, cloudy, time of day)
-- Cast shadows from monument onto ground
-- Proper highlights and shadows on monument
-- Monument fits naturally into environment
-- Correct scale and perspective
+LIGHTING & REALISM:
+- Match lighting, shadows, and perspective to the SECOND IMAGE.
+- Cast shadows consistently based on light direction, time of day.
+- Apply realistic surface reflections and highlights based on material type.
 
-OUTPUT:
-- ONE photorealistic image
-- Monument standing firmly on ground
-- Natural integration with shadows
-- Professional photograph quality
-- Monument is the focal point
+CONSTRAINTS:
+- Do not add new objects (e.g., plaques, text, crowds, flowers) unless they are already present in the input images.
+- Do not alter the rest of the scene. Keep all scene elements intact.
+
+OUTPUT REQUIREMENTS:
+- Provide only 1 image.
+- Resolution must match the realism and quality expected from a professional monument photo.
+- Focus on realism, identity preservation, and seamless environmental integration.
 
 Create a scene that looks like a real photograph of an actual monument that has been built in this location.`;
 
