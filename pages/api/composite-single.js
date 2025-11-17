@@ -22,49 +22,15 @@ export default async function handler(req, res) {
 
     const prompt = `TASK: Create a monument composite image
 
-MONUMENT CREATION:
-- Study the FIRST IMAGE closely to extract identity: facial features, pose, gesture, clothing details, or key design elements.
-- Create a monument statute based on the subject. If human, turn them into a standing statue. If animal or object, replicate it as a monument.
-- Material: Use appropriate sculpture material (e.g., bronze, marble, stone, or metal).
-- Style: Detailed and realistic. Avoid cartoon or stylized effects.
+TASK TYPE: IMAGE INSERTION / PHOTO EDITING (NOT IMAGE GENERATION)
 
-PLACEMENT IN SCENE:
-- Place the monument FIRMLY on the ground in the setting of the SECOND IMAGE.
-- The base of the monument must be aligned with the environment. It should not float.
-- Cast realistic shadows and effects based on light direction in the scene.
-- Match perspective, scale, and lighting based on the SECOND IMAGE.
-
-SCENE PRESERVATION & FRAMING (IMPORTANT):
-- Maintain the full context of the SECOND IMAGE.
-- Use a wide-angle or medium-wide shot. DO NOT zoom in too closely—it must not crop out the environment.
-- Keep buildings, landscape, or features in the SECOND IMAGE clearly visible.
-- The monument should be prominent, but the surrounding scene MUST stay recognizable.
-- Do NOT alter or remove elements from the original scene.
-
-  FRAMING REQUIREMENTS - IMPORTANT
-- The FINAL image MUST be a wide or medium-wide shot.
-- Show the full scene from Image 2, including landmarks, background, ground, foliage, sky, and signage.
-- Do NOT zoom in, crop, or tightly frame the statue.
-- The monument should take up NO MORE THAN ~30–40% of the frame.
-- Use a wide-angle / establishing-shot camera perspective (24–35mm equivalent).
-
-LIGHTING & REALISM:
-- Match time of day, light direction, shadows, and ambient lighting.
-- Apply realistic highlights and material textures.
-- The monument must look naturally part of the environment (no harsh edges, mismatched tones, or mismatched shadows).
-
-RESTRICTIONS:
-- Do NOT add or invent new elements (e.g., plaques, crowds, text, banners, flowers) unless already present.
-- Do NOT generate close-ups, alternative frames, cutaways, or standalone statue renderings. A full-scene shot is required.
-- Do NOT crop, zoom, or remove scene context.
-- The output must not be stylized like a concept art or cartoon. It must look like a real photograph.
-
-OUTPUT:
-- ONE final image.
-- A wide/medium-wide shot of the monument, fully integrated into the original scene.
-- Monument is accurately based on the FIRST IMAGE and fully placed in the SECOND IMAGE location.
-- Scene context preserved with realistic shadows, perspective, and lighting.
-
+1. The Absolute Background Lock
+"THE SECOND UPLOADED IMAGE IS A FIXED AND UNALTERABLE CANVAS. You are permitted only to ADD a new element to this canvas. You MUST NOT change, alter, re-compose, re-frame, or zoom in on the SECOND IMAGE'S existing background. The final image must contain 100% of the scene shown in the SECOND IMAGE, keeping the original camera angle and aspect ratio intact."
+2. Monument & Smart Placement
+"Create a photorealistic monument of the person from the FIRST IMAGE
+The monument must be intelligently placed in the most logical and proportional focal point of the scene. It MUST be firmly grounded and its size MUST be realistic relative to the environment (not too small, not too large).
+3. Cohesion & Final Output
+"Ensure the monument's lighting, shadows, and perspective are seamlessly and perfectly matched to the preserved background's conditions. The output is a single, realistic photograph that is indistinguishable from a picture taken in that exact spot."
 
 Create a scene that looks like a real photograph of an actual monument that has been built in this location.`;
 
@@ -98,9 +64,9 @@ Create a scene that looks like a real photograph of an actual monument that has 
             parts: contentParts
           }],
           generationConfig: {
-            temperature: 0.7,
-            topP: 0.9,
-            topK: 30,
+            temperature: 0.1,
+            topP: 0.8,
+            topK: 10,
             maxOutputTokens: 8192,
             responseMimeType: "text/plain",
             responseModalities: ["TEXT", "IMAGE"]
